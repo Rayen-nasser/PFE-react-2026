@@ -14,11 +14,11 @@ api.interceptors.request.use((config) => {
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
-  
+
   if (config.data instanceof FormData) {
     delete config.headers['Content-Type'];
   }
-  
+
   return config;
 });
 
@@ -31,8 +31,12 @@ export const authService = {
   },
   login: (data) => api.post('/users/login', data),
   logout: () => api.post('/users/logout'),
+  forgotPassword: (data) => api.post('/users/forgot-password', data),
+  resetPassword: (data) => api.post('/users/reset-password', data),
+  
   getProfile: () => api.get('/users/getMyProfile'),
-  updateProfile: (data) => api.put('/users/profile', data),
+  updateProfile: (id, data) => api.put(`/users/${id}`, data),
+  deleteAccount: (id) => api.delete(`/users/${id}`),
   changePassword: (data) => api.post('/users/change-password', data),
 };
 

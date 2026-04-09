@@ -4,30 +4,118 @@ import { centreService } from '../services/api';
 
 const Centres = () => {
   const [centres, setCentres] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     centreService.getAll()
       .then((res) => setCentres(res.data.data || res.data))
-      .catch(console.error);
+      .catch(console.error)
+      .finally(() => setLoading(false));
   }, []);
 
   return (
-    <div>
-      <h1>Training Centres</h1>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '20px' }}>
-        {centres.map((centre) => (
-          <div key={centre._id} style={{ border: '1px solid #ddd', padding: '20px', borderRadius: '8px' }}>
-            <h3>{centre.nom || centre.name}</h3>
-            <p>{centre.adresse || centre.address}</p>
-            <p>{centre.description}</p>
-            <p><strong>Phone:</strong> {centre.telephone || centre.phone}</p>
-            <Link to={`/formations?centre=${centre._id}`}>
-              <button style={{ marginTop: '10px' }}>View Formations</button>
-            </Link>
+    <>
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,400&family=DM+Sans:wght@300;400;500&display=swap');
+        .ct-root { font-family: 'DM Sans', sans-serif; color: #e8e4dc; padding-top: 48px; }
+        .ct-header { margin-bottom: 48px; }
+        .ct-title { font-family: 'Cormorant Garamond', serif; font-size: clamp(36px, 5vw, 56px); font-weight: 300; color: #f0ebe0; margin: 0 0 12px; }
+        .ct-title em { font-style: italic; color: #b4915a; }
+        .ct-subtitle { font-size: 14px; color: #555; font-weight: 300; }
+
+        .ct-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 20px; }
+
+        .ct-card {
+          border: 1px solid rgba(255,255,255,0.07); border-radius: 14px;
+          background: rgba(255,255,255,0.02); overflow: hidden;
+          transition: border-color 0.25s, transform 0.25s, box-shadow 0.25s;
+        }
+        .ct-card:hover { border-color: rgba(180,145,90,0.25); transform: translateY(-3px); box-shadow: 0 12px 32px rgba(0,0,0,0.35); }
+
+        .ct-card-header {
+          padding: 28px 28px 20px;
+          background: linear-gradient(135deg, #111114, #161620);
+          border-bottom: 1px solid rgba(255,255,255,0.05);
+          display: flex; align-items: flex-start; gap: 16px;
+        }
+        .ct-icon {
+          width: 44px; height: 44px; border-radius: 12px;
+          background: rgba(180,145,90,0.1); border: 1px solid rgba(180,145,90,0.2);
+          display: flex; align-items: center; justify-content: center;
+          font-size: 20px; flex-shrink: 0;
+        }
+        .ct-name { font-size: 17px; font-weight: 500; color: #e8e4dc; margin-bottom: 4px; }
+        .ct-address { font-size: 12px; color: #555; display: flex; align-items: center; gap: 5px; }
+
+        .ct-card-body { padding: 20px 28px 24px; }
+        .ct-description { font-size: 13px; color: #666; line-height: 1.7; font-weight: 300; margin-bottom: 20px; min-height: 40px; }
+
+        .ct-details { display: flex; flex-direction: column; gap: 8px; margin-bottom: 24px; }
+        .ct-detail { display: flex; align-items: center; gap: 8px; font-size: 13px; color: #555; }
+        .ct-detail-icon { color: #444; flex-shrink: 0; }
+
+        .ct-view-btn {
+          display: inline-flex; align-items: center; gap: 6px;
+          padding: 9px 18px; border-radius: 8px;
+          background: rgba(180,145,90,0.1); border: 1px solid rgba(180,145,90,0.25);
+          color: #b4915a; font-size: 13px; text-decoration: none;
+          font-family: 'DM Sans', sans-serif; font-weight: 500;
+          transition: background 0.2s, transform 0.15s;
+        }
+        .ct-view-btn:hover { background: rgba(180,145,90,0.18); transform: translateY(-1px); }
+
+        .ct-spinner { width: 32px; height: 32px; border-radius: 50%; border: 2px solid rgba(255,255,255,0.06); border-top-color: #b4915a; animation: ctspin 0.8s linear infinite; margin: 80px auto; display: block; }
+        @keyframes ctspin { to { transform: rotate(360deg); } }
+      `}</style>
+
+      <div className="ct-root">
+        <div className="ct-header">
+          <h1 className="ct-title">Training <em>Centers</em></h1>
+          <p className="ct-subtitle">Find a professional training center near you</p>
+        </div>
+
+        {loading ? <div className="ct-spinner" /> : (
+          <div className="ct-grid">
+            {centres.map((centre) => (
+              <div key={centre._id} className="ct-card">
+                <div className="ct-card-header">
+                  <div className="ct-icon">🏢</div>
+                  <div>
+                    <div className="ct-name">{centre.nom || centre.name}</div>
+                    {(centre.adresse || centre.address) && (
+                      <div className="ct-address">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                        {centre.adresse || centre.address}
+                      </div>
+                    )}
+                  </div>
+                </div>
+                <div className="ct-card-body">
+                  <p className="ct-description">{centre.description || 'Professional training center offering a wide range of courses.'}</p>
+                  <div className="ct-details">
+                    {(centre.telephone || centre.phone) && (
+                      <div className="ct-detail">
+                        <svg className="ct-detail-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.49 11a19.79 19.79 0 01-3.07-8.67A2 2 0 012.39 2h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.91 9.91a16 16 0 006.08 6.08l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg>
+                        {centre.telephone || centre.phone}
+                      </div>
+                    )}
+                    {centre.email && (
+                      <div className="ct-detail">
+                        <svg className="ct-detail-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                        {centre.email}
+                      </div>
+                    )}
+                  </div>
+                  <Link to={`/formations?centre=${centre._id}`} className="ct-view-btn">
+                    View Courses →
+                  </Link>
+                </div>
+              </div>
+            ))}
           </div>
-        ))}
+        )}
       </div>
-    </div>
+    </>
   );
 };
 

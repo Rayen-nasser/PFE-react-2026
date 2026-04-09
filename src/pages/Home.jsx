@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { formationService, categorieService } from '../services/api';
-import { Card, Button } from '../components/ui';
+
+const CATEGORY_ICONS = ['✦', '◈', '⊕', '◉', '⬡', '⟁', '⊞', '⬖'];
 
 const Home = () => {
   const [formations, setFormations] = useState([]);
@@ -9,153 +10,427 @@ const Home = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    Promise.all([
-      formationService.getAll(),
-      categorieService.getAll()
-    ])
-      .then(([formationsRes, categoriesRes]) => {
-        setFormations(formationsRes.data.data || formationsRes.data);
-        setCategories(categoriesRes.data.data || categoriesRes.data);
+    Promise.all([formationService.getAll(), categorieService.getAll()])
+      .then(([fRes, cRes]) => {
+        setFormations(fRes.data.data || fRes.data);
+        setCategories(cRes.data.data || cRes.data);
       })
       .catch(console.error)
       .finally(() => setLoading(false));
   }, []);
 
-  const features = [
-    {
-      icon: '📚',
-      title: 'Expert Instructors',
-      description: 'Learn from industry professionals with years of experience'
-    },
-    {
-      icon: '🎯',
-      title: 'Flexible Learning',
-      description: 'Study at your own pace, anytime, anywhere'
-    },
-    {
-      icon: '🏆',
-      title: 'Certificates',
-      description: 'Earn recognized certificates upon completion'
-    }
+  if (loading) return (
+    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '60vh' }}>
+      <div className="home-spinner" />
+    </div>
+  );
+
+  const stats = [
+    { value: formations.length || '200+', label: 'Courses' },
+    { value: categories.length || '20+', label: 'Categories' },
+    { value: '5K+', label: 'Students' },
+    { value: '98%', label: 'Satisfaction' },
   ];
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
-      </div>
-    );
-  }
-
   return (
-    <div>
-      {/* Hero Section */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-primary-600 via-primary-700 to-primary-800 rounded-3xl mb-12">
-        <div className="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg%20width%3D%2260%22%20height%3D%2260%22%20viewBox%3D%220%200%2060%2060%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Cg%20fill%3D%22%23ffffff%22%20fill-opacity%3D%220.05%22%3E%3Cpath%20d%3D%22M36%2034v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6%2034v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6%204V0H4v4H0v2h4v4h2V6h4V4H6z%22%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E')] opacity-50"></div>
-        <div className="relative px-8 py-16 md:py-24">
-          <div className="max-w-2xl">
-            <h1 className="text-4xl md:text-5xl font-bold text-white mb-6 leading-tight">
-              Unlock Your Potential with Online Learning
+    <>
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap');
+
+        * { box-sizing: border-box; }
+
+        .home-root {
+          font-family: 'DM Sans', sans-serif;
+          color: #e8e4dc;
+        }
+
+        .home-spinner {
+          width: 36px; height: 36px; border-radius: 50%;
+          border: 2px solid rgba(255,255,255,0.06);
+          border-top-color: #b4915a;
+          animation: spin 0.8s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* ══ HERO ══ */
+        .hero {
+          padding: 96px 0 80px;
+          position: relative;
+          overflow: hidden;
+        }
+        .hero-bg {
+          position: absolute; inset: 0; pointer-events: none;
+          background:
+            radial-gradient(ellipse 80% 60% at 60% 0%, rgba(180,145,90,0.07) 0%, transparent 55%),
+            radial-gradient(ellipse 50% 80% at 10% 100%, rgba(100,80,180,0.05) 0%, transparent 50%);
+        }
+        .hero-grid-lines {
+          position: absolute; inset: 0;
+          background-image:
+            linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
+          background-size: 60px 60px;
+          mask-image: linear-gradient(to bottom, transparent, rgba(0,0,0,0.3) 30%, rgba(0,0,0,0.3) 70%, transparent);
+        }
+        .hero-content { position: relative; max-width: 700px; }
+
+        .hero-eyebrow {
+          display: inline-flex; align-items: center; gap: 8px;
+          font-size: 11px; letter-spacing: 0.22em; text-transform: uppercase;
+          color: #b4915a; margin-bottom: 28px;
+          padding: 6px 14px;
+          border: 1px solid rgba(180,145,90,0.25);
+          border-radius: 40px;
+          background: rgba(180,145,90,0.06);
+        }
+        .hero-eyebrow-dot { width: 5px; height: 5px; border-radius: 50%; background: #b4915a; }
+
+        .hero-title {
+          font-family: 'Cormorant Garamond', serif;
+          font-size: clamp(48px, 6vw, 80px);
+          font-weight: 300;
+          line-height: 1.05;
+          color: #f0ebe0;
+          margin: 0 0 24px;
+          letter-spacing: -0.01em;
+        }
+        .hero-title em {
+          font-style: italic;
+          color: #b4915a;
+        }
+
+        .hero-desc {
+          font-size: 16px; line-height: 1.75; color: #666;
+          max-width: 480px; margin-bottom: 44px; font-weight: 300;
+        }
+
+        .hero-cta { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+
+        .btn-primary {
+          display: inline-flex; align-items: center; gap: 8px;
+          padding: 14px 28px; border-radius: 10px;
+          background: linear-gradient(135deg, #b4915a, #c8a86e);
+          color: #0c0c0e; font-size: 14px; font-weight: 500;
+          letter-spacing: 0.04em; text-decoration: none;
+          transition: opacity 0.2s, transform 0.15s;
+          box-shadow: 0 4px 20px rgba(180,145,90,0.25);
+        }
+        .btn-primary:hover { opacity: 0.9; transform: translateY(-2px); }
+
+        .btn-ghost {
+          display: inline-flex; align-items: center; gap: 8px;
+          padding: 14px 24px; border-radius: 10px;
+          border: 1px solid rgba(255,255,255,0.1);
+          color: #888; font-size: 14px; text-decoration: none;
+          transition: color 0.2s, border-color 0.2s;
+        }
+        .btn-ghost:hover { color: #e8e4dc; border-color: rgba(255,255,255,0.2); }
+
+        /* ══ STATS ══ */
+        .stats-row {
+          display: flex; gap: 0;
+          margin-top: 64px;
+          border-top: 1px solid rgba(255,255,255,0.06);
+          padding-top: 40px;
+        }
+        .stat-item {
+          flex: 1; padding-right: 32px;
+          border-right: 1px solid rgba(255,255,255,0.06);
+          margin-right: 32px;
+        }
+        .stat-item:last-child { border-right: none; margin-right: 0; padding-right: 0; }
+        .stat-value {
+          font-family: 'Cormorant Garamond', serif;
+          font-size: 40px; font-weight: 400; color: #f0ebe0;
+          line-height: 1;
+          margin-bottom: 4px;
+        }
+        .stat-label { font-size: 12px; color: #555; letter-spacing: 0.1em; text-transform: uppercase; }
+
+        /* ══ SECTION HEADER ══ */
+        .section { padding: 80px 0 0; }
+        .section-header {
+          display: flex; align-items: flex-end; justify-content: space-between;
+          margin-bottom: 40px;
+        }
+        .section-title {
+          font-family: 'Cormorant Garamond', serif;
+          font-size: 36px; font-weight: 400; color: #f0ebe0;
+          margin: 0; line-height: 1.1;
+        }
+        .section-title span { font-style: italic; color: #b4915a; }
+        .section-link {
+          font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase;
+          color: #b4915a; text-decoration: none;
+          display: flex; align-items: center; gap: 6px;
+          transition: gap 0.2s;
+        }
+        .section-link:hover { gap: 10px; }
+
+        /* ══ FEATURES ══ */
+        .features-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.06); border-radius: 16px; overflow: hidden; }
+        @media (max-width: 768px) { .features-grid { grid-template-columns: 1fr; } }
+
+        .feature-card {
+          padding: 36px 32px;
+          background: rgba(255,255,255,0.02);
+          transition: background 0.3s;
+        }
+        .feature-card:hover { background: rgba(255,255,255,0.04); }
+        .feature-icon {
+          width: 44px; height: 44px; border-radius: 12px;
+          border: 1px solid rgba(180,145,90,0.2);
+          background: rgba(180,145,90,0.08);
+          display: flex; align-items: center; justify-content: center;
+          font-size: 20px; margin-bottom: 20px;
+        }
+        .feature-title { font-size: 16px; font-weight: 500; color: #e8e4dc; margin-bottom: 8px; }
+        .feature-desc { font-size: 13px; color: #555; line-height: 1.7; font-weight: 300; }
+
+        /* ══ CATEGORIES ══ */
+        .cats-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+          gap: 12px;
+        }
+        .cat-card {
+          padding: 20px 16px;
+          border: 1px solid rgba(255,255,255,0.07);
+          border-radius: 12px;
+          background: rgba(255,255,255,0.02);
+          text-decoration: none;
+          transition: border-color 0.2s, background 0.2s, transform 0.2s;
+          display: block;
+        }
+        .cat-card:hover {
+          border-color: rgba(180,145,90,0.3);
+          background: rgba(180,145,90,0.04);
+          transform: translateY(-2px);
+        }
+        .cat-icon { font-size: 20px; color: #b4915a; margin-bottom: 10px; font-family: monospace; }
+        .cat-name { font-size: 13px; color: #aaa; font-weight: 400; }
+        .cat-card:hover .cat-name { color: #e8e4dc; }
+
+        /* ══ COURSE CARDS ══ */
+        .courses-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+          gap: 20px;
+        }
+        .course-card {
+          border: 1px solid rgba(255,255,255,0.07);
+          border-radius: 14px;
+          background: rgba(255,255,255,0.02);
+          overflow: hidden;
+          text-decoration: none;
+          display: flex; flex-direction: column;
+          transition: border-color 0.25s, transform 0.25s, box-shadow 0.25s;
+        }
+        .course-card:hover {
+          border-color: rgba(180,145,90,0.25);
+          transform: translateY(-4px);
+          box-shadow: 0 16px 40px rgba(0,0,0,0.4);
+        }
+        .course-thumb {
+          height: 150px;
+          background: linear-gradient(135deg, #111114 0%, #1a1a22 100%);
+          position: relative; overflow: hidden;
+          display: flex; align-items: center; justify-content: center;
+        }
+        .course-thumb-glow {
+          position: absolute;
+          width: 120px; height: 120px;
+          border-radius: 50%;
+          background: radial-gradient(circle, rgba(180,145,90,0.2) 0%, transparent 70%);
+        }
+        .course-thumb-label {
+          position: absolute; top: 12px; left: 12px;
+          padding: 4px 10px; border-radius: 6px;
+          background: rgba(180,145,90,0.15);
+          border: 1px solid rgba(180,145,90,0.25);
+          font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase;
+          color: #b4915a;
+        }
+        .course-glyph {
+          font-size: 40px; opacity: 0.15; color: #b4915a;
+          font-family: 'Cormorant Garamond', serif;
+        }
+        .course-body { padding: 20px; flex: 1; display: flex; flex-direction: column; }
+        .course-title {
+          font-size: 15px; font-weight: 500; color: #e8e4dc;
+          margin-bottom: 6px; line-height: 1.4;
+          display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+        }
+        .course-card:hover .course-title { color: #f5f0e8; }
+        .course-desc {
+          font-size: 12px; color: #555; line-height: 1.6;
+          display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+          margin-bottom: 16px; flex: 1; font-weight: 300;
+        }
+        .course-footer {
+          display: flex; align-items: center; justify-content: space-between;
+          padding-top: 14px; border-top: 1px solid rgba(255,255,255,0.06);
+        }
+        .course-price {
+          font-family: 'Cormorant Garamond', serif;
+          font-size: 22px; font-weight: 400; color: #b4915a;
+        }
+        .course-price-unit { font-size: 12px; color: #555; margin-left: 2px; font-family: 'DM Sans', sans-serif; }
+        .course-meta { font-size: 12px; color: #444; }
+
+        /* ══ CTA BANNER ══ */
+        .cta-banner {
+          margin-top: 80px;
+          padding: 64px 56px;
+          border-radius: 20px;
+          background: linear-gradient(145deg, #111114 0%, #161620 100%);
+          border: 1px solid rgba(255,255,255,0.07);
+          position: relative; overflow: hidden;
+          text-align: center;
+        }
+        .cta-banner-bg {
+          position: absolute; inset: 0;
+          background: radial-gradient(ellipse 60% 80% at 50% 0%, rgba(180,145,90,0.1) 0%, transparent 60%);
+        }
+        .cta-banner-content { position: relative; }
+        .cta-banner-title {
+          font-family: 'Cormorant Garamond', serif;
+          font-size: clamp(32px, 4vw, 52px); font-weight: 300;
+          color: #f0ebe0; margin-bottom: 16px; line-height: 1.1;
+        }
+        .cta-banner-desc { font-size: 15px; color: #666; margin-bottom: 36px; font-weight: 300; }
+        .cta-banner-btns { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+
+        @media (max-width: 600px) {
+          .hero { padding: 60px 0 48px; }
+          .stats-row { flex-wrap: wrap; gap: 24px; }
+          .stat-item { border: none; margin: 0; min-width: calc(50% - 12px); }
+          .section-header { flex-direction: column; align-items: flex-start; gap: 12px; }
+          .cta-banner { padding: 40px 24px; }
+        }
+      `}</style>
+
+      <div className="home-root">
+        {/* HERO */}
+        <section className="hero">
+          <div className="hero-bg" />
+          <div className="hero-grid-lines" />
+          <div className="hero-content">
+            <div className="hero-eyebrow">
+              <span className="hero-eyebrow-dot" />
+              Professional Learning Platform
+            </div>
+            <h1 className="hero-title">
+              Knowledge that<br/><em>shapes</em> futures
             </h1>
-            <p className="text-lg text-primary-100 mb-8">
-              Discover thousands of courses taught by expert instructors. 
-              Start your journey to success today.
+            <p className="hero-desc">
+              Discover expertly curated courses taught by industry professionals.
+              Learn at your own pace and unlock your full potential.
             </p>
-            <div className="flex flex-wrap gap-4">
-              <Link to="/formations">
-                <Button className="bg-white text-primary-700 hover:bg-gray-100 px-8 py-3 text-lg">
-                  Explore Courses
-                </Button>
+            <div className="hero-cta">
+              <Link to="/formations" className="btn-primary">
+                Explore Courses
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
               </Link>
-              <Link to="/register">
-                <Button variant="outline" className="border-white text-white hover:bg-white/10 px-8 py-3 text-lg">
-                  Get Started
-                </Button>
-              </Link>
+              <Link to="/register" className="btn-ghost">Create Account</Link>
+            </div>
+
+            {/* Stats */}
+            <div className="stats-row">
+              {stats.map((s, i) => (
+                <div key={i} className="stat-item">
+                  <div className="stat-value">{s.value}</div>
+                  <div className="stat-label">{s.label}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* FEATURES */}
+        <section className="section">
+          <div className="section-header">
+            <h2 className="section-title">Why choose <span>Forma</span></h2>
+          </div>
+          <div className="features-grid">
+            {[
+              { icon: '🎓', title: 'Expert Instructors', desc: 'Learn from industry professionals with decades of real-world experience across diverse fields.' },
+              { icon: '⏱', title: 'Flexible Learning', desc: 'Study at your own pace, on any device. No schedules, no pressure — your journey, your timeline.' },
+              { icon: '🏅', title: 'Certificates', desc: 'Earn recognized certificates upon completion to showcase your skills to employers worldwide.' },
+            ].map((f, i) => (
+              <div key={i} className="feature-card">
+                <div className="feature-icon">{f.icon}</div>
+                <div className="feature-title">{f.title}</div>
+                <div className="feature-desc">{f.desc}</div>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* CATEGORIES */}
+        {categories.length > 0 && (
+          <section className="section">
+            <div className="section-header">
+              <h2 className="section-title">Browse by <span>Category</span></h2>
+              <Link to="/formations" className="section-link">All courses →</Link>
+            </div>
+            <div className="cats-grid">
+              {categories.map((cat, i) => (
+                <Link key={cat._id} to={`/formations?category=${cat._id}`} className="cat-card">
+                  <div className="cat-icon">{CATEGORY_ICONS[i % CATEGORY_ICONS.length]}</div>
+                  <div className="cat-name">{cat.nom || cat.name}</div>
+                </Link>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {/* FEATURED COURSES */}
+        {formations.length > 0 && (
+          <section className="section">
+            <div className="section-header">
+              <h2 className="section-title">Featured <span>Courses</span></h2>
+              <Link to="/formations" className="section-link">View all →</Link>
+            </div>
+            <div className="courses-grid">
+              {formations.slice(0, 8).map((f, i) => (
+                <Link key={f._id} to={`/formations/${f._id}`} className="course-card">
+                  <div className="course-thumb">
+                    <div className="course-thumb-glow" />
+                    <span className="course-thumb-label">{f.categorie?.nom || 'Course'}</span>
+                    <div className="course-glyph">{String.fromCharCode(65 + (i % 26))}</div>
+                  </div>
+                  <div className="course-body">
+                    <div className="course-title">{f.titre || f.title}</div>
+                    <div className="course-desc">{f.description}</div>
+                    <div className="course-footer">
+                      <div>
+                        <span className="course-price">{f.prix || f.price}</span>
+                        <span className="course-price-unit">DT</span>
+                      </div>
+                      <span className="course-meta">{f.duree || f.duration}h</span>
+                    </div>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {/* CTA BANNER */}
+        <div className="cta-banner">
+          <div className="cta-banner-bg" />
+          <div className="cta-banner-content">
+            <h2 className="cta-banner-title">Ready to start learning?</h2>
+            <p className="cta-banner-desc">Join thousands of students already building their future with Forma.</p>
+            <div className="cta-banner-btns">
+              <Link to="/register" className="btn-primary">Start for free</Link>
+              <Link to="/formations" className="btn-ghost">Browse courses</Link>
             </div>
           </div>
         </div>
-      </section>
-
-      {/* Features Section */}
-      <section className="mb-12">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {features.map((feature, index) => (
-            <Card key={index} className="text-center">
-              <div className="text-4xl mb-4">{feature.icon}</div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">{feature.title}</h3>
-              <p className="text-gray-600 text-sm">{feature.description}</p>
-            </Card>
-          ))}
-        </div>
-      </section>
-
-      {/* Categories Section */}
-      <section className="mb-12">
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-2xl font-bold text-gray-900">Browse by Category</h2>
-          <Link to="/formations" className="text-primary-600 hover:text-primary-700 font-medium">
-            View All →
-          </Link>
-        </div>
-        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-          {categories.map((cat) => (
-            <Link 
-              key={cat._id} 
-              to={`/formations?category=${cat._id}`}
-              className="group"
-            >
-              <Card hover className="text-center py-6">
-                <div className="text-2xl mb-2">📁</div>
-                <p className="font-medium text-gray-900 group-hover:text-primary-600 transition-colors">
-                  {cat.nom || cat.name}
-                </p>
-              </Card>
-            </Link>
-          ))}
-        </div>
-      </section>
-
-      {/* Courses Section */}
-      <section>
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-2xl font-bold text-gray-900">Featured Courses</h2>
-          <Link to="/formations" className="text-primary-600 hover:text-primary-700 font-medium">
-            View All →
-          </Link>
-        </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {formations.slice(0, 8).map((formation) => (
-            <Link key={formation._id} to={`/formations/${formation._id}`} className="group">
-              <Card hover className="h-full flex flex-col overflow-hidden p-0">
-                <div className="h-40 bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center">
-                  <span className="text-5xl text-white/50">🎓</span>
-                </div>
-                <div className="p-5 flex flex-col flex-grow">
-                  <span className="text-xs font-medium text-primary-600 mb-2 uppercase tracking-wide">
-                    {formation.categorie?.nom || 'Course'}
-                  </span>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2 group-hover:text-primary-600 transition-colors line-clamp-2">
-                    {formation.titre || formation.title}
-                  </h3>
-                  <p className="text-gray-600 text-sm mb-4 line-clamp-2 flex-grow">
-                    {formation.description}
-                  </p>
-                  <div className="flex items-center justify-between pt-4 border-t border-gray-100">
-                    <span className="text-xl font-bold text-primary-600">
-                      {formation.prix || formation.price} <span className="text-sm font-normal text-gray-500">DT</span>
-                    </span>
-                    <span className="text-sm text-gray-500">
-                      {formation.duree || formation.duration}h
-                    </span>
-                  </div>
-                </div>
-              </Card>
-            </Link>
-          ))}
-        </div>
-      </section>
-    </div>
+      </div>
+    </>
   );
 };
 

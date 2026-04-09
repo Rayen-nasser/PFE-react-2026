@@ -4,6 +4,8 @@ import { Layout } from './components/layout';
 import Home from './pages/Home';
 import Login from './pages/Login';
 import Register from './pages/Register';
+import ForgotPassword from './pages/ForgotPassword';
+import ResetPassword from './pages/ResetPassword';
 import Profile from './pages/Profile';
 import Formations from './pages/Formations';
 import FormationDetail from './pages/FormationDetail';
@@ -21,6 +23,8 @@ function App() {
             <Route index element={<Home />} />
             <Route path="login" element={<Login />} />
             <Route path="register" element={<Register />} />
+            <Route path="forgot-password" element={<ForgotPassword />} />
+            <Route path="reset-password" element={<ResetPassword />} />
             <Route path="profile" element={<Profile />} />
             <Route path="formations" element={<Formations />} />
             <Route path="formations/:id" element={<FormationDetail />} />
