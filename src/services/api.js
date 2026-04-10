@@ -49,13 +49,13 @@ export const centreService = {
 };
 
 export const formationService = {
-  getAll: (params) => api.get('/formations/getAllFormations', { params }),
-  getById: (id) => api.get(`/formations/getFormationById/${id}`),
-  getByCentre: (centreId) => api.get('/formations/getAllFormations', { params: { centreId } }),
-  getByCategorie: (categorieId) => api.get('/formations/getAllFormations', { params: { categorieId } }),
-  create: (data) => api.post('/formations/createFormation', data),
-  update: (id, data) => api.put(`/formations/updateFormation/${id}`, data),
-  delete: (id) => api.delete(`/formations/deleteFormation/${id}`),
+  getAll: (params) => api.get('/formations', { params }),
+  getById: (id) => api.get(`/formations/${id}`),
+  getByCentre: (centreId) => api.get('/formations', { params: { centreId } }),
+  getByCategorie: (categorieId) => api.get('/formations', { params: { categorieId } }),
+  create: (data) => api.post('/formations', data),
+  update: (id, data) => api.put(`/formations/${id}`, data),
+  delete: (id) => api.delete(`/formations/${id}`),
 };
 
 export const leconService = {
