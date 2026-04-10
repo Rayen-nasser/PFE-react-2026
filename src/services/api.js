@@ -49,12 +49,12 @@ export const centreService = {
 };
 
 export const formationService = {
-  getAll: () => api.get('/formations'),
-  getById: (id) => api.get(`/formations/${id}`),
+  getAll: (params) => api.get('/formations/getAllFormations', { params }),
+  getById: (id) => api.get(`/formations/getFormationById/${id}`),
   getByCentre: (centreId) => api.get(`/formations/centre/${centreId}`),
-  create: (data) => api.post('/formations', data),
-  update: (id, data) => api.put(`/formations/${id}`, data),
-  delete: (id) => api.delete(`/formations/${id}`),
+  create: (data) => api.post('/formations/createFormation', data),
+  update: (id, data) => api.put(`/formations/updateFormation/${id}`, data),
+  delete: (id) => api.delete(`/formations/deleteFormation/${id}`),
 };
 
 export const leconService = {
