@@ -106,7 +106,7 @@ const Centres = () => {
                       </div>
                     )}
                   </div>
-                  <Link to={`/formations?centre=${centre._id}`} className="ct-view-btn">
+                  <Link to={`/formations?centreId=${centre._id}`} className="ct-view-btn">
                     View Courses →
                   </Link>
                 </div>

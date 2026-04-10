@@ -376,7 +376,7 @@ const Home = () => {
             </div>
             <div className="cats-grid">
               {categories.map((cat, i) => (
-                <Link key={cat._id} to={`/formations?category=${cat._id}`} className="cat-card">
+                <Link key={cat._id} to={`/formations?categorieId=${cat._id}`} className="cat-card">
                   <div className="cat-icon">{CATEGORY_ICONS[i % CATEGORY_ICONS.length]}</div>
                   <div className="cat-name">{cat.nom || cat.name}</div>
                 </Link>
