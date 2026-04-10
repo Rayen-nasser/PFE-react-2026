@@ -117,11 +117,20 @@ const MyFavoris = () => {
                   <div className="mf-thumb-glyph">{String.fromCharCode(65 + (i % 26))}</div>
                 </div>
                 <div className="mf-card-body">
-                  <div className="mf-card-title">{fav.formation?.titre || fav.formation?.title}</div>
-                  <div className="mf-card-desc">{fav.formation?.description}</div>
+                  <div style={{ display: 'inline-block', padding: '3px 8px', borderRadius: '4px', background: 'rgba(180,145,90,0.1)', color: '#b4915a', fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '8px', fontWeight: 600 }}>
+                    {fav.typeCible === 'formation' ? 'Course' : fav.typeCible === 'lecon' ? 'Lesson' : fav.typeCible === 'centreFormation' ? 'Training Center' : (fav.typeCible || 'Item')}
+                  </div>
+                  <div className="mf-card-title">{fav.cibleTitre || 'Untitled Item'}</div>
+                  <div className="mf-card-desc">Saved on {fav.createdAt ? new Date(fav.createdAt).toLocaleDateString('en-GB') : 'N/A'}</div>
                 </div>
                 <div className="mf-card-footer">
-                  <Link to={`/formations/${fav.formation?._id}`} className="mf-view-btn">View Course</Link>
+                  {fav.typeCible === 'centreFormation' ? (
+                    <Link to={`/centers/${fav.cibleId}`} className="mf-view-btn">View Center</Link>
+                  ) : fav.typeCible === 'lecon' ? (
+                    <Link to={`/formations`} className="mf-view-btn">View Lesson</Link>
+                  ) : (
+                    <Link to={`/formations/${fav.cibleId}`} className="mf-view-btn">View Course</Link>
+                  )}
                   <button className="mf-remove-btn" onClick={() => handleRemove(fav._id)} title="Remove from favorites">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg>
                   </button>

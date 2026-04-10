@@ -33,7 +33,7 @@ export const authService = {
   logout: () => api.post('/users/logout'),
   forgotPassword: (data) => api.post('/users/forgot-password', data),
   resetPassword: (data) => api.post('/users/reset-password', data),
-  
+
   getProfile: () => api.get('/users/getMyProfile'),
   updateProfile: (id, data) => api.put(`/users/${id}`, data),
   deleteAccount: (id) => api.delete(`/users/${id}`),
@@ -49,18 +49,19 @@ export const centreService = {
 };
 
 export const formationService = {
-  getAll: (params) => api.get('/formations/getAllFormations', { params }),
-  getById: (id) => api.get(`/formations/getFormationById/${id}`),
-  getByCentre: (centreId) => api.get(`/formations/centre/${centreId}`),
-  create: (data) => api.post('/formations/createFormation', data),
-  update: (id, data) => api.put(`/formations/updateFormation/${id}`, data),
-  delete: (id) => api.delete(`/formations/deleteFormation/${id}`),
+  getAll: (params) => api.get('/formations', { params }),
+  getById: (id) => api.get(`/formations/${id}`),
+  getByCentre: (centreId) => api.get('/formations', { params: { centreId } }),
+  getByCategorie: (categorieId) => api.get('/formations', { params: { categorieId } }),
+  create: (data) => api.post('/formations', data),
+  update: (id, data) => api.put(`/formations/${id}`, data),
+  delete: (id) => api.delete(`/formations/${id}`),
 };
 
 export const leconService = {
-  getAll: () => api.get('/lecons'),
+  getAll: (params) => api.get('/lecons', { params }),
   getById: (id) => api.get(`/lecons/${id}`),
-  getByFormation: (formationId) => api.get(`/lecons/formation/${formationId}`),
+  getByFormation: (formationId) => api.get('/lecons', { params: { formationId } }),
   create: (data) => api.post('/lecons', data),
   update: (id, data) => api.put(`/lecons/${id}`, data),
   delete: (id) => api.delete(`/lecons/${id}`),
@@ -68,8 +69,8 @@ export const leconService = {
 
 export const contentService = {
   getAll: () => api.get('/contents'),
-  getByLecon: (leconId) => api.get(`/contents/lecon/${leconId}`),
-  create: (data) => api.post('/contents', data),
+  getByLecon: (leconId) => api.get(`/contents/getByLecon/${leconId}`),
+  create: (data) => api.post('/contents/create', data),
   update: (id, data) => api.put(`/contents/${id}`, data),
   delete: (id) => api.delete(`/contents/${id}`),
 };
@@ -92,17 +93,18 @@ export const paiementService = {
 };
 
 export const avisService = {
-  getAll: () => api.get('/avis'),
+  getAll: () => api.get('/avis/getAllAvis'),
   getByFormation: (formationId) => api.get(`/avis/formation/${formationId}`),
-  create: (data) => api.post('/avis', data),
-  update: (id, data) => api.put(`/avis/${id}`, data),
-  delete: (id) => api.delete(`/avis/${id}`),
+  create: (data) => api.post('/avis/createAvis', data),
+  update: (id, data) => api.put(`/avis/updateAvis/${id}`, data),
+  delete: (id) => api.delete(`/avis/deleteAvis/${id}`),
 };
 
 export const favoriService = {
-  getAll: () => api.get('/favoris'),
-  add: (data) => api.post('/favoris', data),
-  remove: (id) => api.delete(`/favoris/${id}`),
+  getAll: () => api.get('/favoris/getAllFavoris'),
+  getByApprenant: (apprenantId) => api.get(`/favoris/getFavorisByApprenant/${apprenantId}`),
+  add: (data) => api.post('/favoris/createFavori', data),
+  remove: (id) => api.delete(`/favoris/deleteFavori/${id}`),
 };
 
 export const categorieService = {
