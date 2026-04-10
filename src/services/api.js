@@ -25,7 +25,7 @@ api.interceptors.request.use((config) => {
 export const authService = {
   register: (data) => {
     const isFormData = data instanceof FormData;
-    return api.post('/users/registerWithImage', data, {
+    return api.post('/users/register-with-image', data, {
       headers: isFormData ? { 'Content-Type': 'multipart/form-data' } : {},
     });
   },
@@ -34,7 +34,7 @@ export const authService = {
   forgotPassword: (data) => api.post('/users/forgot-password', data),
   resetPassword: (data) => api.post('/users/reset-password', data),
 
-  getProfile: () => api.get('/users/getMyProfile'),
+  getProfile: () => api.get('/users/me'),
   updateProfile: (id, data) => api.put(`/users/${id}`, data),
   deleteAccount: (id) => api.delete(`/users/${id}`),
   changePassword: (data) => api.post('/users/change-password', data),
@@ -77,7 +77,7 @@ export const contentService = {
 
 export const inscriptionService = {
   getAll: () => api.get('/inscriptions'),
-  getMyInscriptions: () => api.get('/inscriptions/my'),
+  getMyInscriptions: () => api.get('/inscriptions/me'),
   getById: (id) => api.get(`/inscriptions/${id}`),
   create: (data) => api.post('/inscriptions', data),
   update: (id, data) => api.put(`/inscriptions/${id}`, data),
@@ -101,10 +101,11 @@ export const avisService = {
 };
 
 export const favoriService = {
-  getAll: () => api.get('/favoris/getAllFavoris'),
-  getByApprenant: (apprenantId) => api.get(`/favoris/getFavorisByApprenant/${apprenantId}`),
-  add: (data) => api.post('/favoris/createFavori', data),
-  remove: (id) => api.delete(`/favoris/deleteFavori/${id}`),
+  getAll: () => api.get('/favoris'),
+  getMyFavoris: () => api.get('/favoris/me'),
+  getByApprenant: (apprenantId) => api.get(`/favoris/apprenant/${apprenantId}`),
+  add: (data) => api.post('/favoris', data),
+  remove: (id) => api.delete(`/favoris/${id}`),
 };
 
 export const categorieService = {

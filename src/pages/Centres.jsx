@@ -1,10 +1,14 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import { centreService } from '../services/api';
+import { Link, useNavigate } from 'react-router-dom';
+import { centreService, favoriService } from '../services/api';
+import { useAuth } from '../context/AuthContext';
 
 const Centres = () => {
   const [centres, setCentres] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [favorites, setFavorites] = useState([]);
+  const { user } = useAuth();
+  const navigate = useNavigate();
 
   useEffect(() => {
     centreService.getAll()
@@ -12,6 +16,43 @@ const Centres = () => {
       .catch(console.error)
       .finally(() => setLoading(false));
   }, []);
+
+  useEffect(() => {
+    if (user) {
+      favoriService.getMyFavoris()
+        .then((res) => {
+          const favs = res.data.data || res.data;
+          setFavorites(favs.filter(f => f.typeCible === 'centreFormation').map(f => f.cibleId));
+        })
+        .catch(console.error);
+    }
+  }, [user]);
+
+  const toggleFavorite = async (centreId, e) => {
+    e.preventDefault();
+    if (!user) {
+      navigate('/login', { state: { from: { pathname: '/centres' } } });
+      return;
+    }
+
+    const isFav = favorites.includes(centreId);
+    try {
+      if (isFav) {
+        const fav = await favoriService.getMyFavoris();
+        const allFavs = fav.data.data || fav.data;
+        const targetFav = allFavs.find(f => f.cibleId === centreId && f.typeCible === 'centreFormation');
+        if (targetFav) {
+          await favoriService.remove(targetFav._id);
+          setFavorites(favorites.filter(id => id !== centreId));
+        }
+      } else {
+        await favoriService.add({ cibleId: centreId, typeCible: 'centreFormation' });
+        setFavorites([...favorites, centreId]);
+      }
+    } catch (err) {
+      console.error('Failed to toggle favorite:', err);
+    }
+  };
 
   return (
     <>
@@ -37,7 +78,18 @@ const Centres = () => {
           background: linear-gradient(135deg, #111114, #161620);
           border-bottom: 1px solid rgba(255,255,255,0.05);
           display: flex; align-items: flex-start; gap: 16px;
+          position: relative;
         }
+        .ct-fav-btn {
+          position: absolute; top: 16px; right: 16px;
+          width: 36px; height: 36px; border-radius: 50%;
+          background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
+          display: flex; align-items: center; justify-content: center;
+          cursor: pointer; transition: all 0.2s;
+          color: #555;
+        }
+        .ct-fav-btn:hover { background: rgba(255,255,255,0.1); color: #888; }
+        .ct-fav-btn.active { background: rgba(220,100,100,0.15); border-color: rgba(220,100,100,0.3); color: #e07070; }
         .ct-icon {
           width: 44px; height: 44px; border-radius: 12px;
           background: rgba(180,145,90,0.1); border: 1px solid rgba(180,145,90,0.2);
@@ -79,6 +131,15 @@ const Centres = () => {
             {centres.map((centre) => (
               <div key={centre._id} className="ct-card">
                 <div className="ct-card-header">
+                  <button 
+                    className={`ct-fav-btn ${favorites.includes(centre._id) ? 'active' : ''}`}
+                    onClick={(e) => toggleFavorite(centre._id, e)}
+                    title={favorites.includes(centre._id) ? 'Remove from favorites' : 'Add to favorites'}
+                  >
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill={favorites.includes(centre._id) ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="2">
+                      <path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/>
+                    </svg>
+                  </button>
                   <div className="ct-icon">🏢</div>
                   <div>
                     <div className="ct-name">{centre.nom || centre.name}</div>

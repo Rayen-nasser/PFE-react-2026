@@ -10,7 +10,7 @@ const MyFavoris = () => {
 
   useEffect(() => {
     if (user) {
-      favoriService.getAll()
+      favoriService.getMyFavoris()
         .then((res) => setFavoris(res.data.data || res.data))
         .catch(console.error)
         .finally(() => setLoading(false));
