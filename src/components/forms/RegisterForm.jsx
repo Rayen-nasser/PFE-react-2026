@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, Fragment } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 
@@ -45,9 +45,53 @@ const INITIAL_FORM = {
   nom: '', prenom: '', email: '', telephone: '',
   password: '', confirmPassword: '', user_image: null,
   role: '',
-  niveauEtude: '', datenaissance: '', adresse: '',
+  niveauEtude: '', dateNaissance: '', adresse: '',
   specialite: '', experience: '',
   centreId: '',
+};
+
+/* ─── field helper (Outside to prevent remounting on each keystroke) ─── */
+const Field = ({ name, label, type = 'text', placeholder, children, className = '', formData, touched, fieldErrors, change, blur, showPw, setShowPw, showCpw, setShowCpw, ...props }) => {
+  const isSelect = !!children;
+  const hasErr   = touched[name] && fieldErrors[name];
+  return (
+    <div className={`rf-field ${className}`}>
+      <label className="rf-label">{label}</label>
+      <div className="rf-input-wrap">
+        {isSelect ? (
+          <select
+            name={name} value={formData[name]}
+            onChange={change} onBlur={() => blur(name)}
+            className={`rf-input rf-select${hasErr ? ' err' : ''}`}
+            {...props}
+          >
+            {children}
+          </select>
+        ) : (
+          <input
+            name={name} type={type} placeholder={placeholder}
+            value={formData[name]}
+            onChange={change} onBlur={() => blur(name)}
+            className={`rf-input${hasErr ? ' err' : ''}${
+              (name === 'password' || name === 'confirmPassword') ? ' has-icon' : ''
+            }`}
+            {...props}
+          />
+        )}
+        {name === 'password' && (
+          <button type="button" className="rf-eye" onClick={() => setShowPw(p => !p)} tabIndex={-1}>
+            <EyeIcon open={showPw} />
+          </button>
+        )}
+        {name === 'confirmPassword' && (
+          <button type="button" className="rf-eye" onClick={() => setShowCpw(p => !p)} tabIndex={-1}>
+            <EyeIcon open={showCpw} />
+          </button>
+        )}
+      </div>
+      {hasErr && <p className="rf-field-error">{fieldErrors[name]}</p>}
+    </div>
+  );
 };
 
 const RegisterForm = () => {
@@ -89,7 +133,7 @@ const RegisterForm = () => {
     else if (formData.password !== formData.confirmPassword) e.confirmPassword = 'Passwords do not match';
     return e;
   };
-  const validate1 = () => ({}); // profile fields are optional
+  const validate1 = () => ({}); 
   const validate2 = () => {
     const e = {};
     if (!formData.role) e.role = 'Please select a role';
@@ -133,58 +177,16 @@ const RegisterForm = () => {
 
   const strength = getStrength(formData.password);
 
-  /* ── field helper ── */
-  const Field = ({ name, label, type = 'text', placeholder, children, className = '' }) => {
-    const isSelect = !!children;
-    const hasErr   = touched[name] && fieldErrors[name];
-    return (
-      <div className={`rf-field ${className}`}>
-        <label className="rf-label">{label}</label>
-        <div className="rf-input-wrap">
-          {isSelect ? (
-            <select
-              name={name} value={formData[name]}
-              onChange={change} onBlur={() => blur(name)}
-              className={`rf-input rf-select${hasErr ? ' err' : ''}`}
-            >
-              {children}
-            </select>
-          ) : (
-            <input
-              name={name} type={type} placeholder={placeholder}
-              value={formData[name]}
-              onChange={change} onBlur={() => blur(name)}
-              className={`rf-input${hasErr ? ' err' : ''}${
-                (name === 'password' || name === 'confirmPassword') ? ' has-icon' : ''
-              }`}
-            />
-          )}
-          {name === 'password' && (
-            <button type="button" className="rf-eye" onClick={() => setShowPw(p => !p)} tabIndex={-1}>
-              <EyeIcon open={showPw} />
-            </button>
-          )}
-          {name === 'confirmPassword' && (
-            <button type="button" className="rf-eye" onClick={() => setShowCpw(p => !p)} tabIndex={-1}>
-              <EyeIcon open={showCpw} />
-            </button>
-          )}
-        </div>
-        {hasErr && <p className="rf-field-error">{fieldErrors[name]}</p>}
-      </div>
-    );
-  };
-
   /* ── step content ── */
   const renderStep = () => {
     if (step === 0) return (
       <>
         <div className="rf-row-2">
-          <Field name="nom"    label="First Name" placeholder="First name" />
-          <Field name="prenom" label="Last Name"  placeholder="Last name"  />
+          <Field name="prenom" label="First Name" placeholder="Jane" autoComplete="given-name" formData={formData} touched={touched} fieldErrors={fieldErrors} change={change} blur={blur} />
+          <Field name="nom"    label="Last Name"  placeholder="Doe"  autoComplete="family-name" formData={formData} touched={touched} fieldErrors={fieldErrors} change={change} blur={blur} />
         </div>
-        <Field name="email" label="Email" type="email" placeholder="you@example.com" />
-        <Field name="telephone" label="Phone (optional)" type="tel" placeholder="+216 00 000 000" />
+        <Field name="email" label="Email" type="email" placeholder="you@example.com" autoComplete="email" formData={formData} touched={touched} fieldErrors={fieldErrors} change={change} blur={blur} />
+        <Field name="telephone" label="Phone (optional)" type="tel" placeholder="+216 00 000 000" formData={formData} touched={touched} fieldErrors={fieldErrors} change={change} blur={blur} />
 
         {/* password */}
         <div className="rf-field">
@@ -309,7 +311,7 @@ const RegisterForm = () => {
               <div className="rf-field">
                 <label className="rf-label">Date of Birth</label>
                 <div className="rf-input-wrap">
-                  <input type="date" name="datenaissance" value={formData.datenaissance} onChange={change} className="rf-input" />
+                  <input type="date" name="dateNaissance" value={formData.dateNaissance} onChange={change} className="rf-input" />
                 </div>
               </div>
             </div>
@@ -543,15 +545,15 @@ const RegisterForm = () => {
           {/* Stepper */}
           <div className="rf-stepper">
             {STEPS.map((label, i) => (
-              <>
-                <div key={i} className="rf-step-item">
+              <Fragment key={i}>
+                <div className="rf-step-item">
                   <div className={`rf-step-dot ${i < step ? 'done' : i === step ? 'active' : ''}`}>
                     {i < step ? <CheckIcon /> : i + 1}
                   </div>
                   <span className={`rf-step-name ${i < step ? 'done' : i === step ? 'active' : ''}`}>{label}</span>
                 </div>
                 {i < STEPS.length - 1 && <div className={`rf-step-line${i < step ? ' done' : ''}`} key={`line-${i}`} />}
-              </>
+              </Fragment>
             ))}
           </div>
 

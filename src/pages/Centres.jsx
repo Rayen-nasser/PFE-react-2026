@@ -131,7 +131,7 @@ const Centres = () => {
             {centres.map((centre) => (
               <div key={centre._id} className="ct-card">
                 <div className="ct-card-header">
-                  <button 
+                  <button
                     className={`ct-fav-btn ${favorites.includes(centre._id) ? 'active' : ''}`}
                     onClick={(e) => toggleFavorite(centre._id, e)}
                     title={favorites.includes(centre._id) ? 'Remove from favorites' : 'Add to favorites'}

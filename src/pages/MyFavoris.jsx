@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { favoriService } from '../services/api';
+import { favoriService } from '../services/index';
 import { useAuth } from '../context/AuthContext';
 
 const MyFavoris = () => {

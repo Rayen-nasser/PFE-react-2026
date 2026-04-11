@@ -38,7 +38,7 @@ const ForgotPassword = () => {
           <p className="text-gray-600 mb-4">
             We've sent password reset instructions to <strong>{email}</strong>
           </p>
-          
+
           {/* For testing - show token */}
           {resetToken && (
             <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg text-left">
@@ -54,7 +54,7 @@ const ForgotPassword = () => {
               </div>
             </div>
           )}
-          
+
           <Link to="/login">
             <Button variant="outline" className="w-full mt-4">
               Back to Login

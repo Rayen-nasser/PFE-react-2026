@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { formationService, leconService, avisService, inscriptionService, favoriService, contentService } from '../services/api';
+import { formationService, leconService, avisService, inscriptionService, favoriService, contentService, paiementService } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 
 /* ── Star rating component ── */
@@ -56,6 +56,13 @@ const FormationDetail = () => {
   const [reviewError, setReviewError] = useState('');
   const [leconContents, setLeconContents] = useState({});
   const [loadingContents, setLoadingContents] = useState({});
+  
+  // Payment state
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [currentPayment, setCurrentPayment] = useState(null);
+  const [paymentMethod, setPaymentMethod] = useState('carte');
+  const [processingPayment, setProcessingPayment] = useState(false);
+  const [paymentSuccess, setPaymentSuccess] = useState(false);
 
   const handleLeconClick = async (lecon) => {
     if (expandedLecon === lecon._id) {
@@ -83,7 +90,7 @@ const FormationDetail = () => {
     formationService.getById(id).then(r => setFormation(r.data.data || r.data)).catch(console.error);
     leconService.getByFormation(id).then(r => setLecons(r.data.data || r.data)).catch(console.error);
     avisService.getByFormation(id).then(r => setAvis(r.data.data || r.data)).catch(console.error);
-    
+
     if (user) {
       favoriService.getByApprenant(user._id).then(r => {
         const favs = r.data.data || r.data || [];
@@ -99,18 +106,61 @@ const FormationDetail = () => {
   const handleInscription = async () => {
     if (!user) { navigate('/login'); return; }
     setEnrolling(true); setError('');
+    
     try {
-      await inscriptionService.create({ formation: id });
-      setEnrolled(true);
-      setTimeout(() => navigate('/my-inscriptions'), 1400);
+      // Check if course is free or paid
+      if (formation.prix === 0 || formation.prix === '0' || formation.prix === null || formation.prix === undefined) {
+        // FREE COURSE - Direct enrollment
+        await inscriptionService.create({ formation: id });
+        setEnrolled(true);
+        setTimeout(() => navigate('/my-inscriptions'), 1400);
+      } else {
+        // PAID COURSE - Initiate payment
+        const res = await paiementService.create({ formationId: id, methodePaiement: paymentMethod });
+        const paymentData = res.data.data || res.data;
+        setCurrentPayment(paymentData);
+        setShowPaymentModal(true);
+      }
     } catch (err) {
       setError(err.response?.data?.message || 'Enrollment failed');
     } finally { setEnrolling(false); }
   };
 
+  const handlePaymentConfirm = async () => {
+    if (!currentPayment) return;
+    setProcessingPayment(true);
+    
+    try {
+      // Simulate payment processing delay
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      
+      // Confirm payment
+      await paiementService.confirm(currentPayment._id);
+      setPaymentSuccess(true);
+      setShowPaymentModal(false);
+      setEnrolled(true);
+      setTimeout(() => navigate('/my-inscriptions'), 1500);
+    } catch (err) {
+      setError(err.response?.data?.message || 'Payment failed');
+    } finally {
+      setProcessingPayment(false);
+    }
+  };
+
+  const handlePaymentCancel = async () => {
+    if (!currentPayment) return;
+    try {
+      await paiementService.cancel(currentPayment._id);
+      setShowPaymentModal(false);
+      setCurrentPayment(null);
+    } catch (err) {
+      console.error('Cancel failed:', err);
+    }
+  };
+
   const handleFavorite = async () => {
     if (!user) { navigate('/login'); return; }
-    
+
     try {
       if (favorited) {
         setFavorited(false);
@@ -634,6 +684,131 @@ const FormationDetail = () => {
           )}
         </div>
       </div>
+
+      {/* Payment Modal */}
+      {showPaymentModal && currentPayment && (
+        <div className="pm-overlay">
+          <div className="pm-modal">
+            <div className="pm-header">
+              <h2 className="pm-title">Complete Payment</h2>
+              <button className="pm-close" onClick={handlePaymentCancel}>×</button>
+            </div>
+            
+            <div className="pm-body">
+              {paymentSuccess ? (
+                <div className="pm-success">
+                  <div className="pm-success-icon">✓</div>
+                  <h3>Payment Successful!</h3>
+                  <p>You now have access to the course.</p>
+                </div>
+              ) : (
+                <>
+                  <div className="pm-course-info">
+                    <div className="pm-course-title">{formation.titre}</div>
+                    <div className="pm-course-price">{formation.prix} DT</div>
+                  </div>
+
+                  <div className="pm-divider" />
+
+                  <div className="pm-method-section">
+                    <h4>Payment Method</h4>
+                    <div className="pm-methods">
+                      <label className={`pm-method ${paymentMethod === 'carte' ? 'selected' : ''}`}>
+                        <input type="radio" name="payment" value="carte" checked={paymentMethod === 'carte'} onChange={() => setPaymentMethod('carte')} />
+                        <span className="pm-method-icon">💳</span>
+                        <span>Credit Card</span>
+                      </label>
+                      <label className={`pm-method ${paymentMethod === 'virement' ? 'selected' : ''}`}>
+                        <input type="radio" name="payment" value="virement" checked={paymentMethod === 'virement'} onChange={() => setPaymentMethod('virement')} />
+                        <span className="pm-method-icon">🏦</span>
+                        <span>Bank Transfer</span>
+                      </label>
+                      <label className={`pm-method ${paymentMethod === 'especes' ? 'selected' : ''}`}>
+                        <input type="radio" name="payment" value="especes" checked={paymentMethod === 'especes'} onChange={() => setPaymentMethod('especes')} />
+                        <span className="pm-method-icon">💵</span>
+                        <span>Cash</span>
+                      </label>
+                    </div>
+                  </div>
+
+                  {paymentMethod === 'carte' && (
+                    <div className="pm-card-form">
+                      <input type="text" placeholder="Card Number" className="pm-input" defaultValue="4242 4242 4242 4242" />
+                      <div className="pm-card-row">
+                        <input type="text" placeholder="MM/YY" className="pm-input" defaultValue="12/25" />
+                        <input type="text" placeholder="CVC" className="pm-input" defaultValue="123" />
+                      </div>
+                    </div>
+                  )}
+
+                  {error && <div className="pm-error">{error}</div>}
+
+                  <button className="pm-pay-btn" onClick={handlePaymentConfirm} disabled={processingPayment}>
+                    {processingPayment ? (
+                      <><div className="fd-inline-spin" /> Processing...</>
+                    ) : (
+                      <>Pay {formation.prix} DT</>
+                    )}
+                  </button>
+
+                  <button className="pm-cancel-btn" onClick={handlePaymentCancel} disabled={processingPayment}>
+                    Cancel
+                  </button>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      <style>{`
+        .pm-overlay {
+          position: fixed; inset: 0; z-index: 1000;
+          background: rgba(0,0,0,0.85); backdrop-filter: blur(8px);
+          display: flex; align-items: center; justify-content: center;
+          padding: 24px;
+        }
+        .pm-modal {
+          width: 100%; max-width: 440px;
+          background: #111114; border: 1px solid rgba(255,255,255,0.1);
+          border-radius: 20px; overflow: hidden;
+        }
+        .pm-header {
+          padding: 24px 28px 20px; display: flex; align-items: center; justify-content: space-between;
+          background: linear-gradient(135deg, #111114, #1a1a22);
+          border-bottom: 1px solid rgba(255,255,255,0.06);
+        }
+        .pm-title { font-family: 'Cormorant Garamond', serif; font-size: 22px; font-weight: 400; color: #f0ebe0; margin: 0; }
+        .pm-close { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; width: 32px; height: 32px; color: #666; cursor: pointer; font-size: 20px; display: flex; align-items: center; justify-content: center; }
+        .pm-close:hover { color: #aaa; }
+        .pm-body { padding: 28px; }
+        .pm-course-info { text-align: center; margin-bottom: 20px; }
+        .pm-course-title { font-size: 16px; color: #e8e4dc; margin-bottom: 8px; }
+        .pm-course-price { font-family: 'Cormorant Garamond', serif; font-size: 32px; color: #b4915a; }
+        .pm-divider { height: 1px; background: rgba(255,255,255,0.06); margin: 20px 0; }
+        .pm-method-section h4 { font-size: 12px; text-transform: uppercase; letter-spacing: 0.1em; color: #555; margin: 0 0 12px; }
+        .pm-methods { display: flex; flex-direction: column; gap: 8px; }
+        .pm-method { display: flex; align-items: center; gap: 12px; padding: 12px 16px; border: 1px solid rgba(255,255,255,0.08); border-radius: 10px; cursor: pointer; transition: all 0.2s; }
+        .pm-method:hover { border-color: rgba(180,145,90,0.3); }
+        .pm-method.selected { border-color: #b4915a; background: rgba(180,145,90,0.08); }
+        .pm-method input { display: none; }
+        .pm-method-icon { font-size: 20px; }
+        .pm-method span:last-child { font-size: 14px; color: #e8e4dc; }
+        .pm-card-form { margin-top: 16px; }
+        .pm-card-row { display: flex; gap: 12px; }
+        .pm-input { width: 100%; padding: 12px 14px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #e8e4dc; font-size: 14px; margin-bottom: 10px; outline: none; }
+        .pm-input:focus { border-color: #b4915a; }
+        .pm-error { padding: 10px 14px; background: rgba(220,100,100,0.1); border: 1px solid rgba(220,100,100,0.3); border-radius: 8px; color: #e07070; font-size: 13px; margin: 16px 0; }
+        .pm-pay-btn { width: 100%; padding: 14px; background: linear-gradient(135deg, #b4915a, #c8a86e); border: none; border-radius: 10px; color: #0c0c0e; font-size: 15px; font-weight: 500; cursor: pointer; margin-top: 20px; display: flex; align-items: center; justify-content: center; gap: 8px; }
+        .pm-pay-btn:hover { opacity: 0.9; }
+        .pm-pay-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        .pm-cancel-btn { width: 100%; padding: 12px; background: transparent; border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; color: #666; font-size: 14px; cursor: pointer; margin-top: 10px; }
+        .pm-cancel-btn:hover { border-color: rgba(255,255,255,0.2); color: #888; }
+        .pm-success { text-align: center; padding: 20px 0; }
+        .pm-success-icon { width: 60px; height: 60px; border-radius: 50%; background: rgba(74,168,125,0.15); border: 2px solid #4aa87d; color: #4aa87d; font-size: 28px; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px; }
+        .pm-success h3 { font-family: 'Cormorant Garamond', serif; font-size: 22px; color: #f0ebe0; margin: 0 0 8px; }
+        .pm-success p { font-size: 14px; color: #666; margin: 0; }
+      `}</style>
     </>
   );
 };

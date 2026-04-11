@@ -684,8 +684,8 @@ const Profile = () => {
                     </div>
                   )}
                 </div>
-                <InfoRow label="First Name" value={profile?.nom}       name="nom"       editing={editing} formData={formData} onChange={handleChange} />
-                <InfoRow label="Last Name"  value={profile?.prenom}    name="prenom"    editing={editing} formData={formData} onChange={handleChange} />
+                <InfoRow label="First Name" value={profile?.prenom}    name="prenom"    editing={editing} formData={formData} onChange={handleChange} />
+                <InfoRow label="Last Name"  value={profile?.nom}       name="nom"       editing={editing} formData={formData} onChange={handleChange} />
                 <InfoRow label="Email"      value={profile?.email}     name="email"     editing={false}   formData={formData} onChange={handleChange} />
                 <InfoRow label="Phone"      value={profile?.telephone} name="telephone" editing={editing} formData={formData} onChange={handleChange} type="tel" />
               </div>
@@ -710,13 +710,37 @@ const Profile = () => {
                   <InfoRow label="Experience" value={profile?.experience ? `${profile.experience} year${profile.experience !== 1 ? 's' : ''}` : ''} name="experience" editing={editing} formData={formData} onChange={handleChange} type="number" />
                 </div>
               )}
-              {profile?.role === 'responsableCF' && (
+              {/* Center Details Section */}
+              {(profile?.centreId || profile?.centreGereId) && (
                 <div className="pf-section">
-                  <p className="pf-role-section-label">Center Details</p>
-                  <div className="pf-info-row">
-                    <span className="pf-info-label">Managed Center</span>
-                    <span className="pf-info-value">{profile?.centreGereId || <span className="pf-info-empty">—</span>}</span>
-                  </div>
+                  <p className="pf-role-section-label">Training Center</p>
+                  {(() => {
+                    const center = profile.centreGereId || profile.centreId;
+                    return (
+                      <div className="pf-center-card">
+                        <div className="pf-info-row">
+                          <span className="pf-info-label">Name</span>
+                          <span className="pf-info-value" style={{ color: '#b4915a', fontWeight: 500 }}>{center.nom}</span>
+                        </div>
+                        <div className="pf-info-row">
+                          <span className="pf-info-label">Address</span>
+                          <span className="pf-info-value">{center.adresse}</span>
+                        </div>
+                        {center.telephone && (
+                          <div className="pf-info-row">
+                            <span className="pf-info-label">Phone</span>
+                            <span className="pf-info-value">{center.telephone}</span>
+                          </div>
+                        )}
+                        {center.description && (
+                          <div className="pf-info-row" style={{ borderBottom: 'none' }}>
+                            <span className="pf-info-label">Description</span>
+                            <span className="pf-info-value" style={{ opacity: 0.7, fontSize: '13px', lineHeight: 1.5 }}>{center.description}</span>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })()}
                 </div>
               )}
 

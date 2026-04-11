@@ -49,7 +49,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   const logout = async () => {
-    try { await authService.logout(); } catch (_) {}
+    try { await authService.logout(); } catch (_) { }
     localStorage.removeItem('token');
     setUser(null);
   };

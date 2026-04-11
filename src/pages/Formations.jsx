@@ -50,7 +50,8 @@ const Formations = () => {
 
   /* Load categories + centres once */
   useEffect(() => {
-    Promise.all([categorieService.getAll(), centreService.getAll()])
+    const calls = [categorieService.getAll(), centreService.getAll()];
+    Promise.all(calls)
       .then(([catRes, centreRes]) => {
         setCategories(catRes.data.data || catRes.data);
         setCentres(centreRes.data.data || centreRes.data);
