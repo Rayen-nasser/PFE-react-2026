@@ -203,9 +203,21 @@ const Header = () => {
               <>
                 <Link to="/profile" className="hd-user-chip">
                   <div className="hd-avatar">
-                    {(user.nom?.[0] || user.prenom?.[0] || user.email?.[0] || 'U').toUpperCase()}
+                    {user.user_image ? (
+                      <img 
+                        src={`http://localhost:5000/${user.user_image}`} 
+                        alt="" 
+                        style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }} 
+                      />
+                    ) : (
+                      (user.nom?.[0] || user.prenom?.[0] || user.email?.[0] || 'U').toUpperCase()
+                    )}
                   </div>
-                  <span className="hd-user-name">{user.nom || user.prenom || user.email?.split('@')[0]}</span>
+                  <span className="hd-user-name">
+                    {user.nom && user.prenom 
+                      ? `${user.prenom} ${user.nom}` 
+                      : (user.prenom || user.nom || user.email?.split('@')[0])}
+                  </span>
                 </Link>
                 <button className="hd-logout" onClick={logout}>Sign out</button>
               </>
