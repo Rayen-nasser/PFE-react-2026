@@ -65,13 +65,16 @@ const FormationDetail = () => {
   const [paymentSuccess, setPaymentSuccess] = useState(false);
 
   const handleLeconClick = async (lecon) => {
+    // Prevent accessing content if not enrolled
+    if (!enrolled) return;
+
     if (expandedLecon === lecon._id) {
       setExpandedLecon(null);
       return;
     }
     setExpandedLecon(lecon._id);
 
-    if (lecon.hasAccess === false) return; // Do not fetch content that requires access
+    if (lecon.hasAccess === false) return;
 
     if (!leconContents[lecon._id]) {
       setLoadingContents(prev => ({ ...prev, [lecon._id]: true }));
@@ -92,6 +95,17 @@ const FormationDetail = () => {
     avisService.getByFormation(id).then(r => setAvis(r.data.data || r.data)).catch(console.error);
 
     if (user) {
+      // Check if user is already enrolled
+      inscriptionService.getMyInscriptions().then(r => {
+        const inscriptions = r.data.data || r.data || [];
+        const isEnrolled = inscriptions.some(ins => 
+          ins.formation?._id === id || ins.formation === id
+        );
+        if (isEnrolled) {
+          setEnrolled(true);
+        }
+      }).catch(console.error);
+
       favoriService.getByApprenant(user._id).then(r => {
         const favs = r.data.data || r.data || [];
         const isFav = favs.find(f => f.cibleId?._id === id || f.cibleId === id);
@@ -397,7 +411,7 @@ const FormationDetail = () => {
 
           {/* Enroll card */}
           <div className="fd-enroll-card">
-            {enrolled || formation?.hasAccess || (lecons.length > 0 && lecons.some(l => l.hasAccess)) ? (
+            {enrolled ? (
               <div style={{ textAlign: 'center', padding: '10px 0' }}>
                 <div style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 48, height: 48, borderRadius: '50%', background: 'rgba(180,145,90,0.1)', color: '#b4915a', marginBottom: 12 }}>
                   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
@@ -488,8 +502,9 @@ const FormationDetail = () => {
               ) : lecons.map((l, i) => (
                 <div key={l._id}>
                   <div
-                    className={`fd-lecon${expandedLecon === l._id ? ' expanded' : ''}`}
-                    onClick={() => handleLeconClick(l)}
+                    className={`fd-lecon${expandedLecon === l._id ? ' expanded' : ''}${!enrolled ? ' locked' : ''}`}
+                    onClick={() => enrolled && handleLeconClick(l)}
+                    style={{ cursor: enrolled ? 'pointer' : 'not-allowed', opacity: enrolled ? 1 : 0.6 }}
                   >
                     <div className="fd-lecon-num">{String(i + 1).padStart(2, '0')}</div>
                     <div className="fd-lecon-info">
@@ -500,22 +515,18 @@ const FormationDetail = () => {
                       <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
                       {l.duree || l.duration} min
                     </div>
-                    {l.hasAccess === false ? (
+                    {!enrolled ? (
                       <span title="Enroll to view content" style={{ fontSize: 13, flexShrink: 0 }}>🔒</span>
                     ) : (
                       <svg className="fd-lecon-arrow" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M9 18l6-6-6-6"/></svg>
                     )}
                   </div>
-                  {expandedLecon === l._id && (
+                  {expandedLecon === l._id && enrolled && (
                     <div className="fd-lecon-preview">
                       {l.description && <div style={{ marginBottom: 12 }}>{l.description}</div>}
                       {l.contenu && <div style={{ marginBottom: 12, opacity: 0.9 }}>{l.contenu}</div>}
 
-                      {l.hasAccess === false ? (
-                        <div style={{ color: '#e07070', fontSize: 12, marginTop: 8, padding: '10px 14px', background: 'rgba(224,112,112,0.06)', border: '1px solid rgba(224,112,112,0.15)', borderRadius: 8 }}>
-                          🔒 You need to enroll in this course to view the full lesson content.
-                        </div>
-                      ) : loadingContents[l._id] ? (
+                      {loadingContents[l._id] ? (
                         <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: '#888' }}>
                           <div className="fd-inline-spin" style={{ borderColor: 'rgba(255,255,255,0.1)', borderTopColor: '#b4915a', width: 12, height: 12, borderWidth: 2 }}/>
                           <span style={{ fontSize: 12 }}>Loading content...</span>
@@ -539,6 +550,12 @@ const FormationDetail = () => {
                           {!l.description && !l.contenu ? 'No additional content for this lesson.' : ''}
                         </div>
                       )}
+                    </div>
+                  )}
+                  
+                  {!enrolled && expandedLecon === l._id && (
+                    <div style={{ color: '#e07070', fontSize: 12, marginTop: 8, padding: '10px 14px', background: 'rgba(224,112,112,0.06)', border: '1px solid rgba(224,112,112,0.15)', borderRadius: 8 }}>
+                      🔒 You need to enroll in this course to view the full lesson content.
                     </div>
                   )}
                 </div>
