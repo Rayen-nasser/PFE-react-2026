@@ -125,7 +125,7 @@ const FormationDetail = () => {
       // Check if course is free or paid
       if (formation.prix === 0 || formation.prix === '0' || formation.prix === null || formation.prix === undefined) {
         // FREE COURSE - Direct enrollment
-        await inscriptionService.create({ formation: id });
+        await inscriptionService.create({ formationId: id });
         setEnrolled(true);
         setTimeout(() => navigate('/my-inscriptions'), 1400);
       } else {
