@@ -359,7 +359,7 @@ const DeleteModal = ({ profile, onConfirm, onClose, deleting }) => {
    MAIN PROFILE COMPONENT
 ══════════════════════════════════════════ */
 const Profile = () => {
-  const { user, loading: authLoading, logout } = useAuth();
+  const { user, loading: authLoading, logout, refreshUser } = useAuth();
   const navigate = useNavigate();
 
   const [profile, setProfile] = useState(null);
@@ -439,6 +439,7 @@ const Profile = () => {
       setSuccess('Profile updated successfully');
       setEditing(false); setImagePreview(null);
       await fetchProfile();
+      await refreshUser(); // Sync with global state for Header
       setTimeout(() => setSuccess(''), 4000);
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to update profile');
