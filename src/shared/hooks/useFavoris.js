@@ -62,7 +62,6 @@ function useFavoris() {
         }
       } else {
         // Optimistic add
-        const tempId = `temp-${cibleId}`;
         setFavoriteIds((prev) => new Set([...prev, cibleId]));
         try {
           const res = await favoriService.add({ cibleId, typeCible });

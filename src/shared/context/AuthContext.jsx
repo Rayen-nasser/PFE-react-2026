@@ -51,7 +51,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   const logout = async () => {
-    try { await authService.logout(); } catch (_) { }
+    try { await authService.logout(); } catch { /* ignore logout errors */ }
     localStorage.removeItem('token');
     setUser(null);
   };

@@ -141,7 +141,6 @@ const RegisterForm = () => {
   };
   const validators = [validate0, validate1, validate2];
   const fieldErrors = validators[step]();
-  const isStepValid = Object.keys(fieldErrors).length === 0;
 
   const nextStep = () => {
     const errs = validators[step]();

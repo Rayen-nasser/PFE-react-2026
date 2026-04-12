@@ -59,7 +59,6 @@ const FormationDetail = () => {
 
   // Payment state
   const [showPaymentModal, setShowPaymentModal] = useState(false);
-  const [currentPayment, setCurrentPayment] = useState(null);
   const [paymentMethod, setPaymentMethod] = useState('carte');
   const [processingPayment, setProcessingPayment] = useState(false);
   const [paymentSuccess, setPaymentSuccess] = useState(false);
@@ -143,17 +142,14 @@ const FormationDetail = () => {
     setError('');
 
     try {
-      // 1. Create the payment record on the backend
+      // Create the payment record on the backend
       // Note: Backend confirms "carte" payments automatically
-      const res = await paiementService.create({
+      await paiementService.create({
         formationId: id,
         methodePaiement: paymentMethod
       });
 
-      const paymentData = res.data.data || res.data;
-      setCurrentPayment(paymentData);
-
-      // 2. Simulate processing delay for "Wow" factor
+      // Simulate processing delay for "Wow" factor
       await new Promise(resolve => setTimeout(resolve, 1800));
 
       setPaymentSuccess(true);

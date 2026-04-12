@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { formationService, categorieService, centreService } from '../../../services/api';
 
@@ -131,7 +131,6 @@ const Formations = () => {
   /* ── Helper: get category/centre name from populated object OR raw ID ── */
   // Backend populates as `categorieId` (the schema field name), so formation.categorieId is the object
   const getCatName = (f) => f.categorieId?.nom || f.categorie?.nom || '';
-  const getCentName = (f) => f.centreId?.nom || f.centre?.nom || '';
 
   return (
     <>

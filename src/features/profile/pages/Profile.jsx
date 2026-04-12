@@ -432,7 +432,7 @@ const Profile = () => {
             dataToSend.append(key, formData[key]);
         });
       } else {
-        const { user_image, ...rest } = formData;
+        const { user_image: _u, ...rest } = formData;
         dataToSend = rest;
       }
       await profileService.updateProfile(profile._id || profile.id, dataToSend);
