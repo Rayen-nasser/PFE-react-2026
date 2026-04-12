@@ -12,6 +12,7 @@
 export { default as formationService } from '../features/formations/services/formations';
 export { default as centreService }    from '../features/centres/services/centres';
 export { default as authService }      from '../features/auth/services/auth';
+export { default as userService }      from '../features/auth/services/users';
 export { default as profileService }   from '../features/profile/services/profile';
 export { default as categorieService } from '../features/formations/services/categories';
 
