@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import userService from '../../services/users';
-import StatusBadge from '../../shared/components/StatusBadge';
+import userService from '../services/users';
+import StatusBadge from '../shared/components/StatusBadge';
 
 const ROLES = {
   apprenant: { label: 'Apprenant', color: '#6a9fd8', bg: 'rgba(106,159,216,.15)' },
@@ -85,7 +85,7 @@ export default function AdminDashboard() {
 
   const filteredUsers = users.filter(user => {
     const matchesFilter = filter === 'all' || user.role === filter;
-    const matchesSearch = !search || 
+    const matchesSearch = !search ||
       user.nom?.toLowerCase().includes(search.toLowerCase()) ||
       user.prenom?.toLowerCase().includes(search.toLowerCase()) ||
       user.email?.toLowerCase().includes(search.toLowerCase());
@@ -110,40 +110,40 @@ export default function AdminDashboard() {
         .ad-title { font-family: 'Cormorant Garamond', serif; font-size: clamp(32px, 4vw, 48px); font-weight: 300; color: #f0ebe0; margin: 0 0 8px; }
         .ad-title em { font-style: italic; color: #b4915a; }
         .ad-subtitle { font-size: 14px; color: #555; font-weight: 300; }
-        
+
         .ad-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 16px; margin-bottom: 32px; }
         .ad-stat { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.07); border-radius: 12px; padding: 16px 20px; }
         .ad-stat-val { font-family: 'Cormorant Garamond', serif; font-size: 32px; font-weight: 400; color: #b4915a; }
         .ad-stat-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; color: #555; margin-top: 4px; }
-        
+
         .ad-filters { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 24px; align-items: center; }
         .ad-search { flex: 1; min-width: 200px; padding: 10px 16px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #e8e4dc; font-size: 14px; outline: none; }
         .ad-search:focus { border-color: #b4915a; }
         .ad-search::placeholder { color: #555; }
-        
+
         .ad-tabs { display: flex; gap: 4px; background: rgba(255,255,255,0.03); border-radius: 8px; padding: 4px; }
         .ad-tab { padding: 8px 16px; border: none; background: transparent; color: #555; font-size: 13px; border-radius: 6px; cursor: pointer; transition: all 0.2s; font-family: 'DM Sans', sans-serif; }
         .ad-tab:hover { color: #888; }
         .ad-tab.active { background: rgba(180,145,90,0.15); color: #b4915a; }
         .ad-tab-count { margin-left: 6px; opacity: 0.7; }
-        
+
         .ad-table-wrap { overflow-x: auto; }
         .ad-table { width: 100%; border-collapse: collapse; }
         .ad-table th { text-align: left; padding: 12px 16px; font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; color: #555; border-bottom: 1px solid rgba(255,255,255,0.06); }
         .ad-table td { padding: 14px 16px; border-bottom: 1px solid rgba(255,255,255,0.04); font-size: 14px; }
         .ad-table tr:hover td { background: rgba(255,255,255,0.02); }
-        
+
         .ad-user-cell { display: flex; align-items: center; gap: 12px; }
         .ad-avatar { width: 36px; height: 36px; border-radius: 50%; background: rgba(180,145,90,0.15); display: flex; align-items: center; justify-content: center; font-size: 14px; color: #b4915a; overflow: hidden; }
         .ad-avatar img { width: 100%; height: 100%; object-fit: cover; }
         .ad-user-name { font-weight: 500; color: #e8e4dc; }
         .ad-user-email { font-size: 12px; color: #555; }
-        
+
         .ad-role-badge { display: inline-flex; align-items: center; padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.06em; }
-        
+
         .ad-blocked { opacity: 0.5; }
         .ad-blocked-label { display: inline-flex; align-items: center; gap: 4px; padding: 4px 8px; background: rgba(224,112,112,0.15); color: #e07070; border-radius: 4px; font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em; }
-        
+
         .ad-actions { display: flex; gap: 6px; }
         .ad-btn { padding: 6px 12px; border-radius: 6px; font-size: 12px; cursor: pointer; transition: all 0.2s; border: 1px solid rgba(255,255,255,0.1); background: transparent; font-family: 'DM Sans', sans-serif; }
         .ad-btn:disabled { opacity: 0.5; cursor: not-allowed; }
@@ -155,12 +155,12 @@ export default function AdminDashboard() {
         .ad-btn-unblock:hover:not(:disabled) { background: rgba(74,168,125,0.15); }
         .ad-btn-delete { color: #e07070; }
         .ad-btn-delete:hover:not(:disabled) { background: rgba(224,112,112,0.15); }
-        
+
         .ad-role-select { padding: 6px 10px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; color: #e8e4dc; font-size: 12px; cursor: pointer; }
-        
+
         .ad-error { padding: 12px 16px; background: rgba(224,112,112,0.1); border: 1px solid rgba(224,112,112,0.3); border-radius: 8px; color: #e07070; font-size: 14px; margin-bottom: 20px; }
         .ad-empty { text-align: center; padding: 60px 20px; color: #555; font-size: 14px; }
-        
+
         .ad-spinner { width: 32px; height: 32px; border-radius: 50%; border: 2px solid rgba(255,255,255,0.06); border-top-color: #b4915a; animation: adspin 0.8s linear infinite; margin: 60px auto; display: block; }
         @keyframes adspin { to { transform: rotate(360deg); } }
       `}</style>
@@ -186,10 +186,10 @@ export default function AdminDashboard() {
 
           {/* Filters */}
           <div className="ad-filters">
-            <input 
-              type="text" 
-              className="ad-search" 
-              placeholder="Search by name or email..." 
+            <input
+              type="text"
+              className="ad-search"
+              placeholder="Search by name or email..."
               value={search}
               onChange={e => setSearch(e.target.value)}
             />
@@ -247,14 +247,14 @@ export default function AdminDashboard() {
                         </div>
                       </td>
                       <td>
-                        <select 
+                        <select
                           className="ad-role-select"
                           value={user.role}
                           onChange={e => handleRoleChange(user._id, e.target.value)}
                           disabled={actionLoading === user._id}
-                          style={{ 
-                            color: ROLES[user.role]?.color, 
-                            background: ROLES[user.role]?.bg 
+                          style={{
+                            color: ROLES[user.role]?.color,
+                            background: ROLES[user.role]?.bg
                           }}
                         >
                           <option value="apprenant">Apprenant</option>
@@ -273,24 +273,24 @@ export default function AdminDashboard() {
                       <td>
                         <div className="ad-actions">
                           {user.block ? (
-                            <button 
-                              className="ad-btn ad-btn-unblock" 
+                            <button
+                              className="ad-btn ad-btn-unblock"
                               onClick={() => handleUnblock(user._id)}
                               disabled={actionLoading === user._id}
                             >
                               Unblock
                             </button>
                           ) : (
-                            <button 
-                              className="ad-btn ad-btn-block" 
+                            <button
+                              className="ad-btn ad-btn-block"
                               onClick={() => handleBlock(user._id)}
                               disabled={actionLoading === user._id}
                             >
                               Block
                             </button>
                           )}
-                          <button 
-                            className="ad-btn ad-btn-delete" 
+                          <button
+                            className="ad-btn ad-btn-delete"
                             onClick={() => handleDelete(user._id)}
                             disabled={actionLoading === user._id}
                           >
