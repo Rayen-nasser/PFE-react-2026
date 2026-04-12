@@ -1,18 +1,20 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import { AuthProvider } from './context/AuthContext';
-import { Layout } from './components/layout';
-import Home from './pages/Home';
-import Login from './pages/Login';
-import Register from './pages/Register';
-import ForgotPassword from './pages/ForgotPassword';
-import ResetPassword from './pages/ResetPassword';
-import Profile from './pages/Profile';
-import Formations from './pages/Formations';
-import FormationDetail from './pages/FormationDetail';
-import Centres from './pages/Centres';
-import MyInscriptions from './pages/MyInscriptions';
-import MyPaiements from './pages/MyPaiements';
-import MyFavoris from './pages/MyFavoris';
+import { AuthProvider } from './shared/context/AuthContext';
+import { Layout } from './shared/layout';
+import AdminRoute from './components/AdminRoute';
+import Home from './features/home/pages/Home';
+import Login from './features/auth/pages/Login';
+import Register from './features/auth/pages/Register';
+import ForgotPassword from './features/auth/pages/ForgotPassword';
+import ResetPassword from './features/auth/pages/ResetPassword';
+import Profile from './features/profile/pages/Profile';
+import Formations from './features/formations/pages/Formations';
+import FormationDetail from './features/formations/pages/FormationDetail';
+import Centres from './features/centres/pages/Centres';
+import MyInscriptions from './features/dashboard/pages/MyInscriptions';
+import MyPaiements from './features/dashboard/pages/MyPaiements';
+import MyFavoris from './features/dashboard/pages/MyFavoris';
+import AdminDashboard from './pages/AdminDashboard';
 
 function App() {
   return (
@@ -33,6 +35,11 @@ function App() {
             <Route path="my-paiements" element={<MyPaiements />} />
             <Route path="my-favoris" element={<MyFavoris />} />
           </Route>
+          <Route path="/admin" element={
+            <AdminRoute>
+              <AdminDashboard />
+            </AdminRoute>
+          } />
         </Routes>
       </BrowserRouter>
     </AuthProvider>

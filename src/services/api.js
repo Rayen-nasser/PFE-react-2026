@@ -5,20 +5,26 @@
  * keep working without any changes.
  *
  * New code should import directly:
- *   import authService from '../services/auth'
+ *   import authService from '../features/auth/services/auth'
  *   import formationService from '../services/formations'
  */
-export { default as authService }     from './auth';
-export { default as formationService } from './formations';
-export { default as centreService }    from './centres';
+
+export { default as formationService } from '../features/formations/services/formations';
+export { default as centreService }    from '../features/centres/services/centres';
+export { default as authService }      from '../features/auth/services/auth';
+export { default as profileService }   from '../features/profile/services/profile';
+export { default as categorieService } from '../features/formations/services/categories';
+
 export {
   inscriptionService,
   paiementService,
-  avisService,
   favoriService,
-  categorieService,
+} from '../features/dashboard/services/dashboard';
+
+export {
+  avisService,
   leconService,
   contentService,
-} from './index';
+} from '../features/formations/services/content';
 
 export { default } from './client';
