@@ -117,59 +117,64 @@ const FormationDetail = () => {
     }
   }, [id, user]);
 
-  const handleInscription = async () => {
-    if (!user) { navigate('/login'); return; }
-    setEnrolling(true); setError('');
+  const handleInscription = () => {
+    if (!user) { 
+      navigate('/login', { state: { from: { pathname: `/formations/${id}` } } }); 
+      return; 
+    }
     
-    try {
-      // Check if course is free or paid
-      if (formation.prix === 0 || formation.prix === '0' || formation.prix === null || formation.prix === undefined) {
-        // FREE COURSE - Direct enrollment
-        await inscriptionService.create({ formationId: id });
-        setEnrolled(true);
-        setTimeout(() => navigate('/my-inscriptions'), 1400);
-      } else {
-        // PAID COURSE - Initiate payment
-        const res = await paiementService.create({ formationId: id, methodePaiement: paymentMethod });
-        const paymentData = res.data.data || res.data;
-        setCurrentPayment(paymentData);
-        setShowPaymentModal(true);
-      }
-    } catch (err) {
-      setError(err.response?.data?.message || 'Enrollment failed');
-    } finally { setEnrolling(false); }
+    // For free courses, enroll immediately. For paid, open modal.
+    if (formation.prix === 0 || formation.prix === '0' || !formation.prix) {
+      setEnrolling(true);
+      inscriptionService.create({ formationId: id })
+        .then(() => {
+          setEnrolled(true);
+          setTimeout(() => navigate('/my-inscriptions'), 1200);
+        })
+        .catch(err => setError(err.response?.data?.message || 'Enrollment failed'))
+        .finally(() => setEnrolling(false));
+    } else {
+      setShowPaymentModal(true);
+    }
   };
 
   const handlePaymentConfirm = async () => {
-    if (!currentPayment) return;
     setProcessingPayment(true);
+    setError('');
     
     try {
-      // Simulate payment processing delay
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      // 1. Create the payment record on the backend
+      // Note: Backend confirms "carte" payments automatically
+      const res = await paiementService.create({ 
+        formationId: id, 
+        methodePaiement: paymentMethod 
+      });
       
-      // Confirm payment
-      await paiementService.confirm(currentPayment._id);
+      const paymentData = res.data.data || res.data;
+      setCurrentPayment(paymentData);
+
+      // 2. Simulate processing delay for "Wow" factor
+      await new Promise(resolve => setTimeout(resolve, 1800));
+      
       setPaymentSuccess(true);
-      setShowPaymentModal(false);
       setEnrolled(true);
-      setTimeout(() => navigate('/my-inscriptions'), 1500);
+      
+      // Auto-close and navigate after a brief success display
+      setTimeout(() => {
+        setShowPaymentModal(false);
+        navigate('/my-inscriptions');
+      }, 2000);
     } catch (err) {
-      setError(err.response?.data?.message || 'Payment failed');
+      setError(err.response?.data?.message || 'Payment processing failed');
     } finally {
       setProcessingPayment(false);
     }
   };
 
-  const handlePaymentCancel = async () => {
-    if (!currentPayment) return;
-    try {
-      await paiementService.cancel(currentPayment._id);
-      setShowPaymentModal(false);
-      setCurrentPayment(null);
-    } catch (err) {
-      console.error('Cancel failed:', err);
-    }
+  const handlePaymentCancel = () => {
+    setShowPaymentModal(false);
+    setError('');
+    // We don't need to call backend cancel anymore as we haven't created the payment yet
   };
 
   const handleFavorite = async () => {
@@ -703,56 +708,60 @@ const FormationDetail = () => {
       </div>
 
       {/* Payment Modal */}
-      {showPaymentModal && currentPayment && (
-        <div className="pm-overlay">
+      {showPaymentModal && (
+        <div className="pm-overlay" onClick={(e) => e.target === e.currentTarget && !processingPayment && handlePaymentCancel()}>
           <div className="pm-modal">
             <div className="pm-header">
-              <h2 className="pm-title">Complete Payment</h2>
-              <button className="pm-close" onClick={handlePaymentCancel}>×</button>
+              <h2 className="pm-title">Secure Checkout</h2>
+              {!paymentSuccess && !processingPayment && (
+                <button className="pm-close" onClick={handlePaymentCancel}>×</button>
+              )}
             </div>
             
             <div className="pm-body">
               {paymentSuccess ? (
-                <div className="pm-success">
+                <div className="pm-success" style={{ animation: 'pm-bounce 0.5s cubic-bezier(0.34, 1.56, 0.64, 1)' }}>
                   <div className="pm-success-icon">✓</div>
-                  <h3>Payment Successful!</h3>
-                  <p>You now have access to the course.</p>
+                  <h3>Payment Confirmed!</h3>
+                  <p>You've been successfully enrolled in<br/><strong>{formation.titre}</strong></p>
+                  <div style={{ marginTop: 24, fontSize: 12, color: '#444' }}>Redirecting to your dashboard...</div>
                 </div>
               ) : (
                 <>
                   <div className="pm-course-info">
                     <div className="pm-course-title">{formation.titre}</div>
-                    <div className="pm-course-price">{formation.prix} DT</div>
+                    <div className="pm-course-price">{formation.prix} <span style={{fontSize: 14, fontWeight: 300}}>DT</span></div>
                   </div>
 
                   <div className="pm-divider" />
 
                   <div className="pm-method-section">
-                    <h4>Payment Method</h4>
+                    <h4>Select Payment Method</h4>
                     <div className="pm-methods">
                       <label className={`pm-method ${paymentMethod === 'carte' ? 'selected' : ''}`}>
                         <input type="radio" name="payment" value="carte" checked={paymentMethod === 'carte'} onChange={() => setPaymentMethod('carte')} />
                         <span className="pm-method-icon">💳</span>
-                        <span>Credit Card</span>
+                        <div style={{ display: 'flex', flexDirection: 'column' }}>
+                          <span style={{ fontSize: '13px', fontWeight: 500, color: '#e8e4dc' }}>Credit or Debit Card</span>
+                          <span style={{ fontSize: '11px', color: '#555' }}>Instant access granted</span>
+                        </div>
                       </label>
                       <label className={`pm-method ${paymentMethod === 'virement' ? 'selected' : ''}`}>
                         <input type="radio" name="payment" value="virement" checked={paymentMethod === 'virement'} onChange={() => setPaymentMethod('virement')} />
-                        <span className="pm-method-icon">🏦</span>
-                        <span>Bank Transfer</span>
-                      </label>
-                      <label className={`pm-method ${paymentMethod === 'especes' ? 'selected' : ''}`}>
-                        <input type="radio" name="payment" value="especes" checked={paymentMethod === 'especes'} onChange={() => setPaymentMethod('especes')} />
-                        <span className="pm-method-icon">💵</span>
-                        <span>Cash</span>
+                        <span className="pm-method-icon">🏛️</span>
+                        <div style={{ display: 'flex', flexDirection: 'column' }}>
+                          <span style={{ fontSize: '13px', fontWeight: 500, color: '#e8e4dc' }}>Bank Transfer</span>
+                          <span style={{ fontSize: '11px', color: '#555' }}>Requires manual verification</span>
+                        </div>
                       </label>
                     </div>
                   </div>
 
                   {paymentMethod === 'carte' && (
-                    <div className="pm-card-form">
+                    <div className="pm-card-form" style={{ animation: 'pm-fadein 0.3s ease' }}>
                       <input type="text" placeholder="Card Number" className="pm-input" defaultValue="4242 4242 4242 4242" />
                       <div className="pm-card-row">
-                        <input type="text" placeholder="MM/YY" className="pm-input" defaultValue="12/25" />
+                        <input type="text" placeholder="MM / YY" className="pm-input" defaultValue="12/26" />
                         <input type="text" placeholder="CVC" className="pm-input" defaultValue="123" />
                       </div>
                     </div>
@@ -762,9 +771,9 @@ const FormationDetail = () => {
 
                   <button className="pm-pay-btn" onClick={handlePaymentConfirm} disabled={processingPayment}>
                     {processingPayment ? (
-                      <><div className="fd-inline-spin" /> Processing...</>
+                      <><div className="fd-inline-spin" style={{borderColor: 'rgba(0,0,0,0.1)', borderTopColor: '#000'}} /> Finalizing...</>
                     ) : (
-                      <>Pay {formation.prix} DT</>
+                      <>Enroll & Pay {formation.prix} DT</>
                     )}
                   </button>
 
@@ -777,6 +786,11 @@ const FormationDetail = () => {
           </div>
         </div>
       )}
+
+      <style>{`
+        @keyframes pm-bounce { 0% { transform: scale(0.8); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
+        @keyframes pm-fadein { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+      `}</style>
 
       <style>{`
         .pm-overlay {
