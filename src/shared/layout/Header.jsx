@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
@@ -7,6 +7,8 @@ const Header = () => {
   const location = useLocation();
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const userMenuRef = useRef(null);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20);
@@ -14,7 +16,20 @@ const Header = () => {
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
-  useEffect(() => setMenuOpen(false), [location.pathname]);
+  useEffect(() => {
+    setMenuOpen(false);
+    setUserMenuOpen(false);
+  }, [location.pathname]);
+
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (userMenuRef.current && !userMenuRef.current.contains(e.target)) {
+        setUserMenuOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   const isActive = (path) =>
     path === '/' ? location.pathname === '/' : location.pathname.startsWith(path);
@@ -40,7 +55,6 @@ const Header = () => {
           display: flex; align-items: center; justify-content: space-between;
         }
 
-        /* Logo */
         .hd-logo {
           font-family: 'Cormorant Garamond', serif;
           font-size: 24px; font-weight: 500; letter-spacing: 0.06em;
@@ -55,7 +69,6 @@ const Header = () => {
           box-shadow: 0 0 8px rgba(180,145,90,0.6);
         }
 
-        /* Nav */
         .hd-nav {
           display: flex; align-items: center; gap: 2px;
         }
@@ -75,10 +88,9 @@ const Header = () => {
           border-radius: 1px;
         }
 
-        /* Right section */
         .hd-right { display: flex; align-items: center; gap: 12px; }
 
-        /* User chip */
+        .hd-user-wrapper { position: relative; }
         .hd-user-chip {
           display: flex; align-items: center; gap: 10px;
           text-decoration: none;
@@ -87,6 +99,7 @@ const Header = () => {
           border: 1px solid rgba(255,255,255,0.08);
           background: rgba(255,255,255,0.03);
           transition: border-color 0.2s, background 0.2s;
+          cursor: pointer;
         }
         .hd-user-chip:hover { border-color: rgba(180,145,90,0.3); background: rgba(180,145,90,0.05); }
         .hd-avatar {
@@ -97,23 +110,74 @@ const Header = () => {
           flex-shrink: 0;
         }
         .hd-user-name { font-size: 13px; color: #aaa; }
+        .hd-user-chevron { font-size: 10px; color: #555; margin-left: 2px; transition: transform 0.2s; }
+        .hd-user-chevron.open { transform: rotate(180deg); }
 
-        /* Logout btn */
-        .hd-logout {
-          padding: 7px 14px; border-radius: 8px;
-          background: transparent;
-          border: 1px solid rgba(255,255,255,0.08);
-          color: #555; font-size: 12px; font-family: 'DM Sans', sans-serif;
-          cursor: pointer; transition: all 0.2s; letter-spacing: 0.03em;
+        .hd-user-dropdown {
+          position: absolute; top: calc(100% + 8px); right: 0;
+          background: #1a1a1e;
+          border: 1px solid rgba(255,255,255,0.1);
+          border-radius: 12px;
+          min-width: 220px;
+          padding: 8px;
+          box-shadow: 0 16px 48px rgba(0,0,0,0.4);
+          opacity: 0; visibility: hidden;
+          transform: translateY(-8px);
+          transition: all 0.2s ease;
+          z-index: 150;
         }
-        .hd-logout:hover { border-color: rgba(220,110,110,0.4); color: #e07070; }
+        .hd-user-dropdown.open { opacity: 1; visibility: visible; transform: translateY(0); }
 
-        /* CTA buttons */
+        .hd-dropdown-header {
+          padding: 12px 12px 16px;
+          border-bottom: 1px solid rgba(255,255,255,0.06);
+          margin-bottom: 8px;
+        }
+        .hd-dropdown-name { font-size: 14px; font-weight: 500; color: #e8e4dc; margin-bottom: 2px; }
+        .hd-dropdown-email { font-size: 12px; color: #555; }
+        .hd-dropdown-role {
+          display: inline-block;
+          padding: 2px 8px;
+          border-radius: 4px;
+          font-size: 10px;
+          text-transform: uppercase;
+          letter-spacing: 0.05em;
+          margin-top: 6px;
+        }
+        .hd-dropdown-role.admin { background: rgba(224,112,112,0.15); color: #e07070; }
+        .hd-dropdown-role.respCF { background: rgba(125,191,125,0.15); color: #7dbf7d; }
+        .hd-dropdown-role.formateur { background: rgba(200,168,110,0.15); color: #c8a86e; }
+        .hd-dropdown-role.apprenant { background: rgba(106,159,216,0.15); color: #6a9fd8; }
+
+        .hd-dropdown-section { font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: #555; padding: 8px 12px 4px; }
+        .hd-dropdown-link {
+          display: flex; align-items: center; gap: 10px;
+          padding: 10px 12px; border-radius: 8px;
+          font-size: 13px; color: #888; text-decoration: none;
+          transition: all 0.15s;
+        }
+        .hd-dropdown-link:hover { background: rgba(255,255,255,0.05); color: #e8e4dc; }
+        .hd-dropdown-link svg { width: 16px; height: 16px; opacity: 0.7; }
+        .hd-dropdown-link.admin-link { color: #e07070; }
+        .hd-dropdown-link.admin-link:hover { background: rgba(224,112,112,0.1); color: #e07070; }
+        .hd-dropdown-link.resp-link { color: #7dbf7d; }
+        .hd-dropdown-link.resp-link:hover { background: rgba(125,191,125,0.1); color: #7dbf7d; }
+
+        .hd-dropdown-divider { height: 1px; background: rgba(255,255,255,0.06); margin: 8px 0; }
+        .hd-dropdown-btn {
+          display: flex; align-items: center; gap: 10px;
+          width: 100%; padding: 10px 12px; border-radius: 8px;
+          font-size: 13px; color: #e07070; background: none; border: none;
+          cursor: pointer; transition: all 0.15s;
+          font-family: 'DM Sans', sans-serif;
+        }
+        .hd-dropdown-btn:hover { background: rgba(224,112,112,0.1); }
+        .hd-dropdown-btn svg { width: 16px; height: 16px; }
+
         .hd-signin {
           padding: 7px 16px; border-radius: 8px;
           color: #888; font-size: 13px; text-decoration: none;
-          transition: color 0.2s;
-          font-weight: 400;
+          transition: color 0.2s; font-weight: 400;
         }
         .hd-signin:hover { color: #e8e4dc; }
         .hd-register {
@@ -126,7 +190,6 @@ const Header = () => {
         }
         .hd-register:hover { opacity: 0.9; transform: translateY(-1px); }
 
-        /* Mobile hamburger */
         .hd-burger {
           display: none;
           background: none; border: none; cursor: pointer;
@@ -138,7 +201,6 @@ const Header = () => {
           .hd-burger { display: flex; align-items: center; }
         }
 
-        /* Mobile drawer */
         .hd-drawer {
           position: fixed; inset: 64px 0 0 0; z-index: 99;
           background: rgba(12,12,14,0.98);
@@ -150,6 +212,7 @@ const Header = () => {
           pointer-events: ${menuOpen ? 'all' : 'none'};
           transition: transform 0.25s ease, opacity 0.25s ease;
           border-top: 1px solid rgba(255,255,255,0.06);
+          overflow-y: auto;
         }
         .hd-drawer-link {
           padding: 13px 16px; border-radius: 10px;
@@ -159,6 +222,9 @@ const Header = () => {
         }
         .hd-drawer-link:hover, .hd-drawer-link.active { color: #e8e4dc; background: rgba(255,255,255,0.04); }
         .hd-drawer-link.active { color: #b4915a; }
+        .hd-drawer-section { font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: #555; padding: 16px 16px 8px; }
+        .hd-drawer-admin { color: #e07070; }
+        .hd-drawer-resp { color: #7dbf7d; }
         .hd-drawer-divider { height: 1px; background: rgba(255,255,255,0.06); margin: 8px 0; }
         .hd-drawer-cta {
           display: flex; gap: 10px; margin-top: 8px;
@@ -178,13 +244,11 @@ const Header = () => {
 
       <header className="hd-root">
         <div className="hd-inner">
-          {/* Logo */}
           <Link to="/" className="hd-logo">
             <span className="hd-logo-dot" />
             Forma
           </Link>
 
-          {/* Desktop nav */}
           <nav className="hd-nav">
             <Link to="/" className={`hd-nav-link${isActive('/') ? ' active' : ''}`}>Home</Link>
             <Link to="/formations" className={`hd-nav-link${isActive('/formations') ? ' active' : ''}`}>Courses</Link>
@@ -193,44 +257,78 @@ const Header = () => {
               <>
                 <Link to="/my-inscriptions" className={`hd-nav-link${isActive('/my-inscriptions') ? ' active' : ''}`}>Enrollments</Link>
                 <Link to="/my-favoris" className={`hd-nav-link${isActive('/my-favoris') ? ' active' : ''}`}>Favorites</Link>
-                {user.role === 'admin' && (
-                  <Link to="/admin" className={`hd-nav-link${isActive('/admin') ? ' active' : ''}`} style={{ color: '#e07070' }}>Admin</Link>
-                )}
               </>
             )}
           </nav>
 
-          {/* Right */}
           <div className="hd-right">
             {user ? (
-              <>
-                <Link to="/profile" className="hd-user-chip">
+              <div className="hd-user-wrapper" ref={userMenuRef}>
+                <div className="hd-user-chip" onClick={() => setUserMenuOpen(o => !o)}>
                   <div className="hd-avatar">
                     {user.user_image ? (
-                      <img
-                        src={`http://localhost:5000/${user.user_image}`}
-                        alt=""
-                        style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }}
-                      />
+                      <img src={`http://localhost:5000/${user.user_image}`} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }} />
                     ) : (
                       (user.nom?.[0] || user.prenom?.[0] || user.email?.[0] || 'U').toUpperCase()
                     )}
                   </div>
                   <span className="hd-user-name">
-                    {user.nom && user.prenom
-                      ? `${user.prenom} ${user.nom}`
-                      : (user.prenom || user.nom || user.email?.split('@')[0])}
+                    {user.prenom || user.nom || user.email?.split('@')[0]}
                   </span>
-                </Link>
-                <button className="hd-logout" onClick={logout}>Sign out</button>
-              </>
+                  <span className={`hd-user-chevron ${userMenuOpen ? 'open' : ''}`}>▼</span>
+                </div>
+
+                <div className={`hd-user-dropdown ${userMenuOpen ? 'open' : ''}`}>
+                  <div className="hd-dropdown-header">
+                    <div className="hd-dropdown-name">{user.prenom} {user.nom}</div>
+                    <div className="hd-dropdown-email">{user.email}</div>
+                    <span className={`hd-dropdown-role ${user.role}`}>{user.role}</span>
+                  </div>
+
+                  <Link to="/profile" className="hd-dropdown-link">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                    My Profile
+                  </Link>
+
+                  {(user.role === 'admin' || user.role === 'responsableCF') && (
+                    <>
+                      <div className="hd-dropdown-section">Management</div>
+                      {user.role === 'admin' && (
+                        <>
+                          <Link to="/admin" className="hd-dropdown-link admin-link">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                            User Management
+                          </Link>
+                          <Link to="/admin/reports" className="hd-dropdown-link admin-link">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                            Reported Content
+                          </Link>
+                          <Link to="/admin/statistics" className="hd-dropdown-link admin-link">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+                            Platform Statistics
+                          </Link>
+                        </>
+                      )}
+                      <Link to="/admin/categories" className="hd-dropdown-link resp-link">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+                        Categories
+                      </Link>
+                    </>
+                  )}
+
+                  <div className="hd-dropdown-divider" />
+                  <button className="hd-dropdown-btn" onClick={logout}>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                    Sign out
+                  </button>
+                </div>
+              </div>
             ) : (
               <>
                 <Link to="/login" className="hd-signin">Sign In</Link>
                 <Link to="/register" className="hd-register">Get Started</Link>
               </>
             )}
-            {/* Hamburger */}
             <button className="hd-burger" onClick={() => setMenuOpen(o => !o)} aria-label="Menu">
               <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 {menuOpen ? (
@@ -244,7 +342,6 @@ const Header = () => {
         </div>
       </header>
 
-      {/* Mobile drawer */}
       <div className="hd-drawer">
         <Link to="/" className={`hd-drawer-link${isActive('/') ? ' active' : ''}`}>Home</Link>
         <Link to="/formations" className={`hd-drawer-link${isActive('/formations') ? ' active' : ''}`}>Courses</Link>
@@ -253,18 +350,30 @@ const Header = () => {
           <>
             <Link to="/my-inscriptions" className={`hd-drawer-link${isActive('/my-inscriptions') ? ' active' : ''}`}>My Enrollments</Link>
             <Link to="/my-favoris" className={`hd-drawer-link${isActive('/my-favoris') ? ' active' : ''}`}>My Favorites</Link>
-            <Link to="/profile" className={`hd-drawer-link${isActive('/profile') ? ' active' : ''}`}>Profile</Link>
-            {user.role === 'admin' && (
-              <Link to="/admin" className={`hd-drawer-link${isActive('/admin') ? ' active' : ''}`} style={{ color: '#e07070' }}>Admin Dashboard</Link>
+            <Link to="/profile" className={`hd-drawer-link${isActive('/profile') ? ' active' : ''}`}>My Profile</Link>
+            
+            {(user.role === 'admin' || user.role === 'responsableCF') && (
+              <>
+                <div className="hd-drawer-divider" />
+                <div className="hd-drawer-section">Management</div>
+                {user.role === 'admin' && (
+                  <>
+                    <Link to="/admin" className={`hd-drawer-link${isActive('/admin') && !isActive('/admin/') ? ' active' : ''}`} style={{ color: '#e07070' }}>User Management</Link>
+                    <Link to="/admin/reports" className={`hd-drawer-link${isActive('/admin/reports') ? ' active' : ''}`} style={{ color: '#e07070' }}>Reported Content</Link>
+                    <Link to="/admin/statistics" className={`hd-drawer-link${isActive('/admin/statistics') ? ' active' : ''}`} style={{ color: '#e07070' }}>Statistics</Link>
+                  </>
+                )}
+                <Link to="/admin/categories" className={`hd-drawer-link${isActive('/admin/categories') ? ' active' : ''}`} style={{ color: '#7dbf7d' }}>Categories</Link>
+              </>
             )}
+            
+            <div className="hd-drawer-divider" />
+            <button onClick={logout} className="hd-drawer-btn outline" style={{ background: 'none', cursor: 'pointer', fontFamily: 'DM Sans, sans-serif', color: '#e07070' }}>
+              Sign out
+            </button>
           </>
         )}
-        <div className="hd-drawer-divider" />
-        {user ? (
-          <button onClick={logout} className="hd-drawer-btn outline" style={{ background: 'none', cursor: 'pointer', fontFamily: 'DM Sans, sans-serif' }}>
-            Sign out
-          </button>
-        ) : (
+        {!user && (
           <div className="hd-drawer-cta">
             <Link to="/login" className="hd-drawer-btn outline">Sign In</Link>
             <Link to="/register" className="hd-drawer-btn filled">Get Started</Link>

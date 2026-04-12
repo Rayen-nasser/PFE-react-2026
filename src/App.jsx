@@ -14,7 +14,11 @@ import Centres from './features/centres/pages/Centres';
 import MyInscriptions from './features/dashboard/pages/MyInscriptions';
 import MyPaiements from './features/dashboard/pages/MyPaiements';
 import MyFavoris from './features/dashboard/pages/MyFavoris';
-import AdminDashboard from './pages/AdminDashboard';
+import AdminDashboard from './features/admin/pages/AdminDashboard';
+import AdminUsers from './features/admin/pages/AdminUsers';
+import AdminReports from './features/admin/pages/AdminReports';
+import AdminStatistics from './features/admin/pages/AdminStatistics';
+import AdminCategories from './features/admin/pages/AdminCategories';
 
 function App() {
   return (
@@ -38,6 +42,26 @@ function App() {
           <Route path="/admin" element={
             <AdminRoute>
               <AdminDashboard />
+            </AdminRoute>
+          } />
+          <Route path="/admin/users" element={
+            <AdminRoute>
+              <AdminUsers />
+            </AdminRoute>
+          } />
+          <Route path="/admin/reports" element={
+            <AdminRoute>
+              <AdminReports />
+            </AdminRoute>
+          } />
+          <Route path="/admin/statistics" element={
+            <AdminRoute>
+              <AdminStatistics />
+            </AdminRoute>
+          } />
+          <Route path="/admin/categories" element={
+            <AdminRoute>
+              <AdminCategories />
             </AdminRoute>
           } />
         </Routes>
