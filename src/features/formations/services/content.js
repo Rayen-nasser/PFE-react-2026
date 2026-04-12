@@ -1,11 +1,13 @@
 import client from '../../../services/client';
 
 export const avisService = {
-  getAll:         ()         => client.get('/avis/getAllAvis'),
+  getAll:         ()         => client.get('/avis'),
+  getMyReviews:   ()         => client.get('/avis/me'),
   getByFormation: (id)       => client.get(`/avis/formation/${id}`),
-  create:         (data)     => client.post('/avis/createAvis', data),
-  update:         (id, data) => client.put(`/avis/updateAvis/${id}`, data),
-  delete:         (id)       => client.delete(`/avis/deleteAvis/${id}`),
+  getById:        (id)       => client.get(`/avis/${id}`),
+  create:         (data)     => client.post('/avis', data),
+  update:         (id, data) => client.put(`/avis/${id}`, data),
+  delete:         (id)       => client.delete(`/avis/${id}`),
 };
 
 export const leconService = {
@@ -18,9 +20,10 @@ export const leconService = {
 };
 
 export const contentService = {
-  getAll:     ()         => client.get('/contents'),
-  getByLecon: (id)       => client.get(`/contents/getByLecon/${id}`),
-  create:     (data)     => client.post('/contents/create', data),
-  update:     (id, data) => client.put(`/contents/${id}`, data),
-  delete:     (id)       => client.delete(`/contents/${id}`),
+  getByLesson: (id)       => client.get(`/contents/lesson/${id}`),
+  getById:     (id)       => client.get(`/contents/${id}`),
+  create:      (data)     => client.post('/contents', data),
+  update:      (id, data) => client.put(`/contents/${id}`, data),
+  delete:      (id)       => client.delete(`/contents/${id}`),
+  submitTest:  (id, data) => client.post(`/contents/${id}/submit`, data),
 };
