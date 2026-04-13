@@ -19,6 +19,12 @@ import AdminUsers from './features/admin/pages/AdminUsers';
 import AdminReports from './features/admin/pages/AdminReports';
 import AdminStatistics from './features/admin/pages/AdminStatistics';
 import AdminCategories from './features/admin/pages/AdminCategories';
+import ResponsableCFRoute from './features/responsableCF/components/ResponsableCFRoute';
+import ResponsableDashboard from './features/responsableCF/pages/ResponsableDashboard';
+import ResponsableCentres from './features/responsableCF/pages/ResponsableCentres';
+import ResponsableFormations from './features/responsableCF/pages/ResponsableFormations';
+import ResponsableInscriptions from './features/responsableCF/pages/ResponsableInscriptions';
+import ResponsablePayments from './features/responsableCF/pages/ResponsablePayments';
 
 function App() {
   return (
@@ -63,6 +69,31 @@ function App() {
             <AdminRoute>
               <AdminCategories />
             </AdminRoute>
+          } />
+          <Route path="/responsable" element={
+            <ResponsableCFRoute>
+              <ResponsableDashboard />
+            </ResponsableCFRoute>
+          } />
+          <Route path="/responsable/centres" element={
+            <ResponsableCFRoute>
+              <ResponsableCentres />
+            </ResponsableCFRoute>
+          } />
+          <Route path="/responsable/formations" element={
+            <ResponsableCFRoute>
+              <ResponsableFormations />
+            </ResponsableCFRoute>
+          } />
+          <Route path="/responsable/inscriptions" element={
+            <ResponsableCFRoute>
+              <ResponsableInscriptions />
+            </ResponsableCFRoute>
+          } />
+          <Route path="/responsable/payments" element={
+            <ResponsableCFRoute>
+              <ResponsablePayments />
+            </ResponsableCFRoute>
           } />
         </Routes>
       </BrowserRouter>
