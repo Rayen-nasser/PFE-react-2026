@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import adminService from '../services/admin';
-import AdminLayout from '../../../components/AdminLayout';
+import AdminLayout from '../components/AdminLayout';
 
 const ROLES = {
   apprenant: { label: 'Apprenant', color: '#6a9fd8', bg: 'rgba(106,159,216,.15)' },

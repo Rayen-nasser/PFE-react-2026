@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import client from '../../../services/client';
-import AdminLayout from '../../../components/AdminLayout';
+import AdminLayout from '../components/AdminLayout';
 
 const STATUS_COLORS = {
   pending: { color: '#c8a86e', bg: 'rgba(200,168,110,.15)' },

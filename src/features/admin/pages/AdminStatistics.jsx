@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import adminService from '../services/admin';
-import AdminLayout from '../../../components/AdminLayout';
+import AdminLayout from '../components/AdminLayout';
 
 export default function AdminStatistics() {
   const [loading, setLoading] = useState(true);

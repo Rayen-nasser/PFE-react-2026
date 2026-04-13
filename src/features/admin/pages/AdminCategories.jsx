@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../../../shared/context/AuthContext';
 import categorieService from '../../formations/services/categories';
-import AdminLayout from '../../../components/AdminLayout';
+import AdminLayout from '../components/AdminLayout';
 
 export default function AdminCategories() {
   const { user } = useAuth();
