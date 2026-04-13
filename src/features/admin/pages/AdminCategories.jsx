@@ -1,16 +1,20 @@
 import { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import { useAuth } from '../../../shared/context/AuthContext';
 import categorieService from '../../formations/services/categories';
 import AdminLayout from '../components/AdminLayout';
+import ResponsableCFLayout from '../../responsableCF/components/ResponsableCFLayout';
 
 export default function AdminCategories() {
   const { user } = useAuth();
+  const location = useLocation();
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [showModal, setShowModal] = useState(false);
   const [editingCategory, setEditingCategory] = useState(null);
-  const [formData, setFormData] = useState({ nom: '', description: '', image: '' });
+  const [formData, setFormData] = useState({ nom: '', description: '', image: null });
+  const [imagePreview, setImagePreview] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
   const canManage = user?.role === 'admin' || user?.role === 'responsableCF';
@@ -38,14 +42,24 @@ export default function AdminCategories() {
 
     setSubmitting(true);
     try {
+      const data = new FormData();
+      data.append('nom', formData.nom);
+      if (formData.description) data.append('description', formData.description);
+      if (formData.image instanceof File) {
+        data.append('image', formData.image);
+      } else if (formData.image) {
+        data.append('image', formData.image);
+      }
+
       if (editingCategory) {
-        await categorieService.update(editingCategory._id, formData);
+        await categorieService.update(editingCategory._id, data);
       } else {
-        await categorieService.create(formData);
+        await categorieService.create(data);
       }
       setShowModal(false);
       setEditingCategory(null);
-      setFormData({ nom: '', description: '', image: '' });
+      setFormData({ nom: '', description: '', image: null });
+      setImagePreview('');
       fetchCategories();
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to save category');
@@ -56,7 +70,8 @@ export default function AdminCategories() {
 
   const handleEdit = (category) => {
     setEditingCategory(category);
-    setFormData({ nom: category.nom || '', description: category.description || '', image: category.image || '' });
+    setFormData({ nom: category.nom || '', description: category.description || '', image: category.image || null });
+    setImagePreview(category.image || '');
     setShowModal(true);
   };
 
@@ -72,12 +87,16 @@ export default function AdminCategories() {
 
   const openCreateModal = () => {
     setEditingCategory(null);
-    setFormData({ nom: '', description: '', image: '' });
+    setFormData({ nom: '', description: '', image: null });
+    setImagePreview('');
     setShowModal(true);
   };
 
+  const isResponsable = location.pathname.startsWith('/responsable');
+  const Layout = isResponsable ? ResponsableCFLayout : AdminLayout;
+
   return (
-    <AdminLayout title="Course <em>Categories</em>" subtitle="Manage training course categories">
+    <Layout title="Course <em>Categories</em>" subtitle="Manage training course categories">
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,400&family=DM+Sans:wght@300;400;500&display=swap');
 
@@ -150,7 +169,7 @@ export default function AdminCategories() {
           {categories.map(category => (
             <div key={category._id} className="cat-card">
               {category.image ? (
-                <img src={`http://localhost:5000/${category.image}`} alt={category.nom} className="cat-card-image" />
+                <img src={category.image} alt={category.nom} className="cat-card-image" />
               ) : (
                 <div className="cat-card-placeholder">
                   <span className="cat-card-placeholder-icon">📁</span>
@@ -159,7 +178,8 @@ export default function AdminCategories() {
               <div className="cat-card-body">
                 <h3 className="cat-card-name">{category.nom}</h3>
                 <p className="cat-card-desc">{category.description || 'No description'}</p>
-                {canManage && (
+                {/* Authorization: Only owner or admin can edit/delete */}
+                {(user?.role === 'admin' || category.ownerId === user?._id) && (
                   <div className="cat-card-actions">
                     <button className="cat-btn cat-btn-edit" onClick={() => handleEdit(category)}>Edit</button>
                     <button className="cat-btn cat-btn-delete" onClick={() => handleDelete(category._id)}>Delete</button>
@@ -201,14 +221,25 @@ export default function AdminCategories() {
                   />
                 </div>
                 <div className="cat-form-group">
-                  <label className="cat-form-label">Image URL</label>
-                  <input
-                    type="text"
-                    className="cat-form-input"
-                    value={formData.image}
-                    onChange={e => setFormData(d => ({ ...d, image: e.target.value }))}
-                    placeholder="Image URL (optional)"
-                  />
+                  <label className="cat-form-label">Category image</label>
+                  <label className="cat-file-drop" style={{ display: 'flex', alignItems: 'center', width: '100%', padding: '14px 16px', background: 'rgba(255,255,255,0.02)', border: '1px dashed rgba(255,255,255,0.15)', borderRadius: 8, cursor: 'pointer' }}>
+                    <input type="file" accept="image/*" style={{ display: 'none' }} onChange={e => {
+                      const file = e.target.files[0];
+                      if (file) { 
+                        setFormData(d => ({ ...d, image: file })); 
+                        setImagePreview(URL.createObjectURL(file)); 
+                      }
+                    }} />
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" style={{ opacity: 0.4 }}><rect x="3" y="3" width="18" height="18" rx="2" /><circle cx="8.5" cy="8.5" r="1.5" /><polyline points="21 15 16 10 5 21" /></svg>
+                    <span style={{ fontSize: 13, color: '#666', marginLeft: 8 }}>Click to upload image</span>
+                  </label>
+                  {imagePreview && (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginTop: 10 }}>
+                      <img src={imagePreview} alt="preview" style={{ width: 64, height: 64, borderRadius: 8, objectFit: 'cover', border: '1px solid rgba(255,255,255,0.1)' }} />
+                      <button type="button" style={{ padding: '4px 12px', borderRadius: 6, background: 'rgba(224,112,112,0.1)', border: '1px solid rgba(224,112,112,0.2)', color: '#e07070', fontSize: 12, cursor: 'pointer', fontFamily: 'inherit' }}
+                        onClick={() => { setFormData(d => ({ ...d, image: null })); setImagePreview(''); }}>Remove</button>
+                    </div>
+                  )}
                 </div>
               </div>
               <div className="cat-modal-footer">
@@ -221,6 +252,6 @@ export default function AdminCategories() {
           </div>
         </div>
       )}
-    </AdminLayout>
+    </Layout>
   );
 }
