@@ -95,6 +95,11 @@ function App() {
               <ResponsablePayments />
             </ResponsableCFRoute>
           } />
+          <Route path="/responsable/categories" element={
+            <ResponsableCFRoute>
+              <AdminCategories />
+            </ResponsableCFRoute>
+          } />
         </Routes>
       </BrowserRouter>
     </AuthProvider>
