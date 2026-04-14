@@ -22,12 +22,19 @@ export default function FormateurFormationDetail() {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const [formationRes, lessonsRes] = await Promise.all([
-        formationService.getById(id),
-        leconService.getAll({ formationId: id }),
-      ]);
+      const formationRes = await formationService.getById(id);
       setFormation(formationRes.data.data);
-      setLessons(lessonsRes.data.data || []);
+      
+      try {
+        const lessonsRes = await leconService.getAll({ formationId: id });
+        setLessons(lessonsRes.data.data || []);
+      } catch (lessonErr) {
+        if (lessonErr.response?.status === 404) {
+          setLessons([]);
+        } else {
+          throw lessonErr;
+        }
+      }
     } catch (e) {
       console.error('Failed to fetch data', e);
     } finally {
