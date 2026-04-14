@@ -283,7 +283,7 @@ function FormationModal({ editing, centres, categories, onClose, onSubmit }) {
 }
 
 // ── Assign Formateurs Modal ───────────────────────────────────────────────────
-function AssignModal({ formation, formateurs, onClose, onAssign, onRemove }) {
+function AssignModal({ formation, formateurs, onClose, onAssign }) {
   const [selected, setSelected] = useState([]);
   const [assigning, setAssigning] = useState(false);
 
@@ -298,8 +298,6 @@ function AssignModal({ formation, formateurs, onClose, onAssign, onRemove }) {
     try { await onAssign(selected); }
     finally { setAssigning(false); }
   };
-
-  const assignedFormateurs = formation.formateurIds || [];
 
   return (
     <div style={styles.overlay} onClick={onClose}>
@@ -466,21 +464,6 @@ export default function ResponsableFormations() {
     }
   };
 
-  const handleRemove = async (formateurId) => {
-    try {
-      const res = await formationService.removeFormateur(assignTarget._id, formateurId);
-      const updatedFormation = res.data.data;
-
-      // Update local state
-      setFormations(prev => prev.map(f => f._id === updatedFormation._id ? updatedFormation : f));
-      setAssignTarget(updatedFormation);
-
-      toast('Formateur removed');
-    } catch (err) {
-      toast(err.response?.data?.message || 'Failed to remove formateur', 'error');
-    }
-  };
-
   const filtered = formations.filter(f => {
     const q = search.toLowerCase();
     const matchQ = !q || f.titre?.toLowerCase().includes(q) || f.description?.toLowerCase().includes(q);
@@ -592,7 +575,6 @@ export default function ResponsableFormations() {
           formateurs={formateurs}
           onClose={() => { setShowAssign(false); setAssignTarget(null); }}
           onAssign={handleAssign}
-          onRemove={handleRemove}
         />
       )}
       {confirmTarget && (

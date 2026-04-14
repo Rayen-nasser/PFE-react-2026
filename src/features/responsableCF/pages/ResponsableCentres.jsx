@@ -8,7 +8,8 @@ export default function ResponsableCentres() {
   const [error, setError] = useState('');
   const [showModal, setShowModal] = useState(false);
   const [editingCentre, setEditingCentre] = useState(null);
-  const [formData, setFormData] = useState({ nom: '', adresse: '', description: '', telephone: '', logo: '' });
+  const [formData, setFormData] = useState({ nom: '', adresse: '', description: '', telephone: '', logo: null, user_image: null });
+  const [logoPreview, setLogoPreview] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
@@ -34,14 +35,22 @@ export default function ResponsableCentres() {
 
     setSubmitting(true);
     try {
+      const data = new FormData();
+      data.append('nom', formData.nom);
+      data.append('adresse', formData.adresse);
+      data.append('description', formData.description);
+      data.append('telephone', formData.telephone);
+      data.append('logo', formData.logo || '');
+
       if (editingCentre) {
-        await centreService.update(editingCentre._id, formData);
+        await centreService.update(editingCentre._id, data);
       } else {
-        await centreService.create(formData);
+        await centreService.create(data);
       }
       setShowModal(false);
       setEditingCentre(null);
-      setFormData({ nom: '', adresse: '', description: '', telephone: '', logo: '' });
+      setFormData({ nom: '', adresse: '', description: '', telephone: '', logo: null, user_image: null });
+      setLogoPreview('');
       fetchCentres();
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to save centre');
@@ -57,8 +66,9 @@ export default function ResponsableCentres() {
       adresse: centre.adresse || '',
       description: centre.description || '',
       telephone: centre.telephone || '',
-      logo: centre.logo || '',
+      logo: null,
     });
+    setLogoPreview(centre.logo || '');
     setShowModal(true);
   };
 
@@ -74,7 +84,8 @@ export default function ResponsableCentres() {
 
   const openCreateModal = () => {
     setEditingCentre(null);
-    setFormData({ nom: '', adresse: '', description: '', telephone: '', logo: '' });
+    setFormData({ nom: '', adresse: '', description: '', telephone: '', logo: null });
+    setLogoPreview('');
     setShowModal(true);
   };
 
@@ -120,6 +131,9 @@ export default function ResponsableCentres() {
         .rc-btn-submit { padding: 10px 20px; border-radius: 8px; font-size: 14px; font-weight: 500; cursor: pointer; border: none; background: linear-gradient(135deg, #7dbf7d, #4aa87d); color: #0c0c0e; font-family: 'DM Sans', sans-serif; }
         .rc-btn-submit:hover { opacity: 0.9; }
         .rc-btn-submit:disabled { opacity: 0.5; cursor: not-allowed; }
+        .rc-form-file { width: 100%; padding: 12px 16px; background: rgba(255,255,255,0.04); border: 1px dashed rgba(255,255,255,0.2); border-radius: 8px; color: #888; font-size: 14px; font-family: 'DM Sans', sans-serif; cursor: pointer; }
+        .rc-form-file:hover { border-color: #7dbf7d; }
+        .rc-logo-preview { width: 80px; height: 80px; border-radius: 8px; object-fit: cover; margin-top: 12px; border: 1px solid rgba(255,255,255,0.1); }
 
         .rc-empty { text-align: center; padding: 60px 20px; color: #555; }
         .rc-empty-title { font-family: 'Cormorant Garamond', serif; font-size: 24px; color: #888; margin-bottom: 8px; }
@@ -147,7 +161,7 @@ export default function ResponsableCentres() {
             <div key={centre._id} className="rc-card">
               <div className="rc-card-image">
                 {centre.logo ? (
-                  <img src={centre.logo} alt={centre.nom} />
+                  <img src={centre.logo.startsWith('http') ? centre.logo : `http://localhost:5000/${centre.logo}`} alt={centre.nom} />
                 ) : (
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M3 21h18M5 21V7l8-4v18M19 21V11l-6-4M9 9v.01M9 12v.01M9 15v.01M9 18v.01"/></svg>
                 )}
@@ -195,8 +209,15 @@ export default function ResponsableCentres() {
                   <textarea className="rc-form-textarea" value={formData.description} onChange={e => setFormData(d => ({ ...d, description: e.target.value }))} placeholder="Description..." />
                 </div>
                 <div className="rc-form-group">
-                  <label className="rc-form-label">Logo URL</label>
-                  <input type="text" className="rc-form-input" value={formData.logo} onChange={e => setFormData(d => ({ ...d, logo: e.target.value }))} placeholder="Logo URL" />
+                  <label className="rc-form-label">Logo</label>
+                  <input type="file" className="rc-form-file" accept="image/*" onChange={e => {
+                    const file = e.target.files[0];
+                    if (file) {
+                      setFormData(d => ({ ...d, logo: file }));
+                      setLogoPreview(URL.createObjectURL(file));
+                    }
+                  }} />
+                  {logoPreview && <img src={logoPreview} alt="Logo preview" className="rc-logo-preview" />}
                 </div>
               </div>
               <div className="rc-modal-footer">

@@ -1,7 +1,7 @@
 import client from '../../../services/client';
 
 const userService = {
-  getAll: () => client.get('/users/getAllUsers'),
+  getAll: () => client.get('/users'),
   getById: (id) => client.get(`/users/${id}`),
   update: (id, userData) => client.put(`/users/${id}`, userData),
   delete: (id) => client.delete(`/users/${id}`),

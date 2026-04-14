@@ -339,6 +339,19 @@ const Header = () => {
                       </Link>
                     </>
                   )}
+                  {user.role === 'formateur' && (
+                    <>
+                      <div className="hd-dropdown-section">Formateur</div>
+                      <Link to="/formateur" className="hd-dropdown-link" style={{ color: '#7ca8d4' }}>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+                        Dashboard
+                      </Link>
+                      <Link to="/formateur/formations" className="hd-dropdown-link" style={{ color: '#7ca8d4' }}>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+                        My Formations
+                      </Link>
+                    </>
+                  )}
 
                   <div className="hd-dropdown-divider" />
                   <button className="hd-dropdown-btn" onClick={logout}>

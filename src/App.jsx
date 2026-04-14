@@ -25,6 +25,11 @@ import ResponsableCentres from './features/responsableCF/pages/ResponsableCentre
 import ResponsableFormations from './features/responsableCF/pages/ResponsableFormations';
 import ResponsableInscriptions from './features/responsableCF/pages/ResponsableInscriptions';
 import ResponsablePayments from './features/responsableCF/pages/ResponsablePayments';
+import FormateurRoute from './features/formateur/components/FormateurRoute';
+import FormateurDashboard from './features/formateur/pages/FormateurDashboard';
+import FormateurFormations from './features/formateur/pages/FormateurFormations';
+import FormateurFormationDetail from './features/formateur/pages/FormateurFormationDetail';
+import FormateurLessonDetail from './features/formateur/pages/FormateurLessonDetail';
 
 function App() {
   return (
@@ -99,6 +104,26 @@ function App() {
             <ResponsableCFRoute>
               <AdminCategories />
             </ResponsableCFRoute>
+          } />
+          <Route path="/formateur" element={
+            <FormateurRoute>
+              <FormateurDashboard />
+            </FormateurRoute>
+          } />
+          <Route path="/formateur/formations" element={
+            <FormateurRoute>
+              <FormateurFormations />
+            </FormateurRoute>
+          } />
+          <Route path="/formateur/formations/:id" element={
+            <FormateurRoute>
+              <FormateurFormationDetail />
+            </FormateurRoute>
+          } />
+          <Route path="/formateur/formations/:id/lessons/:lessonId" element={
+            <FormateurRoute>
+              <FormateurLessonDetail />
+            </FormateurRoute>
           } />
         </Routes>
       </BrowserRouter>
