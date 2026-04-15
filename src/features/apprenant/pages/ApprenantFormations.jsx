@@ -83,7 +83,7 @@ export default function ApprenantFormations() {
         </div>
       ) : (
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: 20 }}>
-          {filteredInscriptions.map(ins => (
+          {filteredInscriptions.filter(ins => ins.formation?._id).map(ins => (
             <Link key={ins._id} to={`/formations/${ins.formation?._id}`} style={{ textDecoration: 'none' }}>
               <div style={{
                 background: 'rgba(255,255,255,0.02)',

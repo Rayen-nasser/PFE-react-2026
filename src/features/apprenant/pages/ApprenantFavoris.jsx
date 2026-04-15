@@ -52,7 +52,7 @@ export default function ApprenantFavoris() {
         </div>
       ) : (
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: 20 }}>
-          {favoris.map(fav => (
+          {favoris.filter(fav => fav.formation?._id).map(fav => (
             <div key={fav._id} style={{
               background: 'rgba(255,255,255,0.02)',
               border: '1px solid rgba(255,255,255,0.06)',

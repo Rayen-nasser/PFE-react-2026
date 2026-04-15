@@ -122,7 +122,7 @@ export default function ApprenantDashboard() {
         </div>
       ) : (
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: 20 }}>
-          {recentFormations.map(f => (
+          {recentFormations.filter(f => f.formation?._id).map(f => (
             <Link key={f._id} to={`/formations/${f.formation?._id}`} style={{ textDecoration: 'none' }}>
               <div style={{
                 background: 'rgba(255,255,255,0.02)',

@@ -103,16 +103,17 @@ const FormationDetail = () => {
         if (isEnrolled) {
           setEnrolled(true);
         }
-      }).catch(console.error);
+      }).catch(() => {});
 
-      favoriService.getByApprenant(user._id).then(r => {
+      // Try to get favorites - handle 403 gracefully
+      favoriService.getMyFavoris().then(r => {
         const favs = r.data.data || r.data || [];
         const isFav = favs.find(f => f.cibleId?._id === id || f.cibleId === id);
         if (isFav) {
           setFavorited(true);
           setFavoriId(isFav._id);
         }
-      }).catch(console.error);
+      }).catch(() => {});
     }
   }, [id, user]);
 
@@ -128,7 +129,7 @@ const FormationDetail = () => {
       inscriptionService.create({ formationId: id })
         .then(() => {
           setEnrolled(true);
-          setTimeout(() => navigate('/my-inscriptions'), 1200);
+          setTimeout(() => navigate('/apprenant/formations'), 1200);
         })
         .catch(err => setError(err.response?.data?.message || 'Enrollment failed'))
         .finally(() => setEnrolling(false));
@@ -158,7 +159,7 @@ const FormationDetail = () => {
       // Auto-close and navigate after a brief success display
       setTimeout(() => {
         setShowPaymentModal(false);
-        navigate('/my-inscriptions');
+        navigate('/apprenant/formations');
       }, 2000);
     } catch (err) {
       setError(err.response?.data?.message || 'Payment processing failed');
