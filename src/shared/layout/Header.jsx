@@ -253,10 +253,10 @@ const Header = () => {
             <Link to="/" className={`hd-nav-link${isActive('/') ? ' active' : ''}`}>Home</Link>
             <Link to="/formations" className={`hd-nav-link${isActive('/formations') ? ' active' : ''}`}>Courses</Link>
             <Link to="/centres" className={`hd-nav-link${isActive('/centres') ? ' active' : ''}`}>Centers</Link>
-            {user && (
+            {user && user.role === 'apprenant' && (
               <>
-                <Link to="/my-inscriptions" className={`hd-nav-link${isActive('/my-inscriptions') ? ' active' : ''}`}>Enrollments</Link>
-                <Link to="/my-favoris" className={`hd-nav-link${isActive('/my-favoris') ? ' active' : ''}`}>Favorites</Link>
+                <Link to="/apprenant/formations" className={`hd-nav-link${isActive('/apprenant/formations') ? ' active' : ''}`}>My Courses</Link>
+                <Link to="/apprenant/favoris" className={`hd-nav-link${isActive('/apprenant/favoris') ? ' active' : ''}`}>Favorites</Link>
               </>
             )}
           </nav>
@@ -352,6 +352,27 @@ const Header = () => {
                       </Link>
                     </>
                   )}
+                  {user.role === 'apprenant' && (
+                    <>
+                      <div className="hd-dropdown-section">My Learning</div>
+                      <Link to="/apprenant" className="hd-dropdown-link" style={{ color: '#6a9fd8' }}>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+                        Dashboard
+                      </Link>
+                      <Link to="/apprenant/formations" className="hd-dropdown-link" style={{ color: '#6a9fd8' }}>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+                        My Courses
+                      </Link>
+                      <Link to="/apprenant/favoris" className="hd-dropdown-link" style={{ color: '#6a9fd8' }}>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+                        Favorites
+                      </Link>
+                      <Link to="/apprenant/paiements" className="hd-dropdown-link" style={{ color: '#6a9fd8' }}>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+                        Payments
+                      </Link>
+                    </>
+                  )}
 
                   <div className="hd-dropdown-divider" />
                   <button className="hd-dropdown-btn" onClick={logout}>
@@ -385,10 +406,16 @@ const Header = () => {
         <Link to="/centres" className={`hd-drawer-link${isActive('/centres') ? ' active' : ''}`}>Centers</Link>
         {user && (
           <>
-            <Link to="/my-inscriptions" className={`hd-drawer-link${isActive('/my-inscriptions') ? ' active' : ''}`}>My Enrollments</Link>
-            <Link to="/my-favoris" className={`hd-drawer-link${isActive('/my-favoris') ? ' active' : ''}`}>My Favorites</Link>
             <Link to="/profile" className={`hd-drawer-link${isActive('/profile') ? ' active' : ''}`}>My Profile</Link>
-            
+            {user.role === 'apprenant' && (
+              <>
+                <div className="hd-drawer-section">My Learning</div>
+                <Link to="/apprenant" className={`hd-drawer-link${isActive('/apprenant') && !isActive('/apprenant/') ? ' active' : ''}`} style={{ color: '#6a9fd8' }}>Dashboard</Link>
+                <Link to="/apprenant/formations" className={`hd-drawer-link${isActive('/apprenant/formations') ? ' active' : ''}`} style={{ color: '#6a9fd8' }}>My Courses</Link>
+                <Link to="/apprenant/favoris" className={`hd-drawer-link${isActive('/apprenant/favoris') ? ' active' : ''}`} style={{ color: '#6a9fd8' }}>Favorites</Link>
+                <Link to="/apprenant/paiements" className={`hd-drawer-link${isActive('/apprenant/paiements') ? ' active' : ''}`} style={{ color: '#6a9fd8' }}>Payments</Link>
+              </>
+            )}
             {(user.role === 'admin' || user.role === 'responsableCF') && (
               <>
                 <div className="hd-drawer-divider" />

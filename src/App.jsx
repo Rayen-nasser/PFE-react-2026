@@ -11,9 +11,6 @@ import Profile from './features/profile/pages/Profile';
 import Formations from './features/formations/pages/Formations';
 import FormationDetail from './features/formations/pages/FormationDetail';
 import Centres from './features/centres/pages/Centres';
-import MyInscriptions from './features/dashboard/pages/MyInscriptions';
-import MyPaiements from './features/dashboard/pages/MyPaiements';
-import MyFavoris from './features/dashboard/pages/MyFavoris';
 import AdminDashboard from './features/admin/pages/AdminDashboard';
 import AdminUsers from './features/admin/pages/AdminUsers';
 import AdminReports from './features/admin/pages/AdminReports';
@@ -30,6 +27,11 @@ import FormateurDashboard from './features/formateur/pages/FormateurDashboard';
 import FormateurFormations from './features/formateur/pages/FormateurFormations';
 import FormateurFormationDetail from './features/formateur/pages/FormateurFormationDetail';
 import FormateurLessonDetail from './features/formateur/pages/FormateurLessonDetail';
+import ApprenantRoute from './features/apprenant/components/ApprenantRoute';
+import ApprenantDashboard from './features/apprenant/pages/ApprenantDashboard';
+import ApprenantFormations from './features/apprenant/pages/ApprenantFormations';
+import ApprenantPaiements from './features/apprenant/pages/ApprenantPaiements';
+import ApprenantFavoris from './features/apprenant/pages/ApprenantFavoris';
 
 function App() {
   return (
@@ -46,9 +48,6 @@ function App() {
             <Route path="formations" element={<Formations />} />
             <Route path="formations/:id" element={<FormationDetail />} />
             <Route path="centres" element={<Centres />} />
-            <Route path="my-inscriptions" element={<MyInscriptions />} />
-            <Route path="my-paiements" element={<MyPaiements />} />
-            <Route path="my-favoris" element={<MyFavoris />} />
           </Route>
           <Route path="/admin" element={
             <AdminRoute>
@@ -124,6 +123,26 @@ function App() {
             <FormateurRoute>
               <FormateurLessonDetail />
             </FormateurRoute>
+          } />
+          <Route path="/apprenant" element={
+            <ApprenantRoute>
+              <ApprenantDashboard />
+            </ApprenantRoute>
+          } />
+          <Route path="/apprenant/formations" element={
+            <ApprenantRoute>
+              <ApprenantFormations />
+            </ApprenantRoute>
+          } />
+          <Route path="/apprenant/paiements" element={
+            <ApprenantRoute>
+              <ApprenantPaiements />
+            </ApprenantRoute>
+          } />
+          <Route path="/apprenant/favoris" element={
+            <ApprenantRoute>
+              <ApprenantFavoris />
+            </ApprenantRoute>
           } />
         </Routes>
       </BrowserRouter>
