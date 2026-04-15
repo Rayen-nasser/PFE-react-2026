@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { formationService, categorieService } from '../../../services/api';
+import { useAuth } from '../../../shared/context/AuthContext';
 
 const CATEGORY_ICONS = ['✦', '◈', '⊕', '◉', '⬡', '⟁', '⊞', '⬖'];
 
 const Home = () => {
+  const { user } = useAuth();
   const [formations, setFormations] = useState([]);
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -327,12 +329,12 @@ const Home = () => {
               Discover expertly curated courses taught by industry professionals.
               Learn at your own pace and unlock your full potential.
             </p>
-            <div className="hero-cta">
+              <div className="hero-cta">
               <Link to="/formations" className="btn-primary">
                 Explore Courses
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
               </Link>
-              <Link to="/register" className="btn-ghost">Create Account</Link>
+              {!user && <Link to="/register" className="btn-ghost">Create Account</Link>}
             </div>
 
             {/* Stats */}
@@ -424,7 +426,7 @@ const Home = () => {
             <h2 className="cta-banner-title">Ready to start learning?</h2>
             <p className="cta-banner-desc">Join thousands of students already building their future with Forma.</p>
             <div className="cta-banner-btns">
-              <Link to="/register" className="btn-primary">Start for free</Link>
+              {!user && <Link to="/register" className="btn-primary">Start for free</Link>}
               <Link to="/formations" className="btn-ghost">Browse courses</Link>
             </div>
           </div>
