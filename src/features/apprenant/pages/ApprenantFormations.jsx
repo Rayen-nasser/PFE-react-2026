@@ -83,8 +83,8 @@ export default function ApprenantFormations() {
         </div>
       ) : (
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: 20 }}>
-          {filteredInscriptions.filter(ins => ins.formation?._id).map(ins => (
-            <Link key={ins._id} to={`/formations/${ins.formation?._id}`} style={{ textDecoration: 'none' }}>
+          {filteredInscriptions.filter(ins => ins.formationId).map(ins => (
+            <Link key={ins._id} to={`/formations/${ins.formationId}`} style={{ textDecoration: 'none' }}>
               <div style={{
                 background: 'rgba(255,255,255,0.02)',
                 border: '1px solid rgba(255,255,255,0.06)',
@@ -96,8 +96,8 @@ export default function ApprenantFormations() {
               onMouseLeave={e => e.currentTarget.style.borderColor = 'rgba(255,255,255,0.06)'}
               >
                 <div style={{ height: 140, background: 'linear-gradient(135deg, rgba(124,168,212,0.15), rgba(100,140,180,0.08))', position: 'relative' }}>
-                  {ins.formation?.image ? (
-                    <img src={ins.formation.image} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  {ins.formationImage ? (
+                    <img src={ins.formationImage} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                   ) : (
                     <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                       <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#7ca8d4" strokeWidth="1.5" style={{ opacity: 0.3 }}>
@@ -111,14 +111,14 @@ export default function ApprenantFormations() {
                 </div>
                 <div style={{ padding: 20 }}>
                   <h3 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 20, color: '#f0ebe0', margin: '0 0 8px', fontWeight: 400 }}>
-                    {ins.formation?.titre || 'Course'}
+                    {ins.formationTitre || 'Course'}
                   </h3>
                   <div style={{ fontSize: 13, color: '#555', marginBottom: 12 }}>
-                    {ins.formation?.centreId?.nom || 'No centre'}
+                    {ins.centreNom || ''}
                   </div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <span style={{ fontSize: 12, color: '#444' }}>
-                      {ins.formation?.duree || 0}h total
+                      {ins.duree || 0}h total
                     </span>
                     <span style={{ color: '#7ca8d4', fontSize: 12 }}>
                       View Course →

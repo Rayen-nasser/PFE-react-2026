@@ -122,8 +122,8 @@ export default function ApprenantDashboard() {
         </div>
       ) : (
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: 20 }}>
-          {recentFormations.filter(f => f.formation?._id).map(f => (
-            <Link key={f._id} to={`/formations/${f.formation?._id}`} style={{ textDecoration: 'none' }}>
+          {recentFormations.filter(f => f.formationId).map(f => (
+            <Link key={f._id} to={`/formations/${f.formationId}`} style={{ textDecoration: 'none' }}>
               <div style={{
                 background: 'rgba(255,255,255,0.02)',
                 border: '1px solid rgba(255,255,255,0.06)',
@@ -135,8 +135,8 @@ export default function ApprenantDashboard() {
               onMouseLeave={e => e.currentTarget.style.borderColor = 'rgba(255,255,255,0.06)'}
               >
                 <div style={{ height: 120, background: 'linear-gradient(135deg, rgba(124,168,212,0.2), rgba(100,140,180,0.1))', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  {f.formation?.image ? (
-                    <img src={f.formation.image} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  {f.formationImage ? (
+                    <img src={f.formationImage} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                   ) : (
                     <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#7ca8d4" strokeWidth="1.5" style={{ opacity: 0.3 }}>
                       <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
@@ -145,10 +145,10 @@ export default function ApprenantDashboard() {
                 </div>
                 <div style={{ padding: 20 }}>
                   <h3 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 20, color: '#f0ebe0', margin: '0 0 8px', fontWeight: 400 }}>
-                    {f.formation?.titre || 'Course'}
+                    {f.formationTitre || 'Course'}
                   </h3>
                   <div style={{ fontSize: 13, color: '#555' }}>
-                    {f.formation?.centreId?.nom || 'No centre'} &middot; {f.formation?.duree || 0}h
+                    {f.centreNom || ''}
                   </div>
                   <div style={{ marginTop: 12 }}>
                     <StatusBadge status={f.statut} />
