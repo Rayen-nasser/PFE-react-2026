@@ -30,6 +30,7 @@ import FormateurLessonDetail from './features/formateur/pages/FormateurLessonDet
 import ApprenantRoute from './features/apprenant/components/ApprenantRoute';
 import ApprenantDashboard from './features/apprenant/pages/ApprenantDashboard';
 import ApprenantFormations from './features/apprenant/pages/ApprenantFormations';
+import ApprenantLearning from './features/apprenant/pages/ApprenantLearning';
 import ApprenantPaiements from './features/apprenant/pages/ApprenantPaiements';
 import ApprenantFavoris from './features/apprenant/pages/ApprenantFavoris';
 
@@ -132,6 +133,11 @@ function App() {
           <Route path="/apprenant/formations" element={
             <ApprenantRoute>
               <ApprenantFormations />
+            </ApprenantRoute>
+          } />
+          <Route path="/apprenant/learn/:formationId" element={
+            <ApprenantRoute>
+              <ApprenantLearning />
             </ApprenantRoute>
           } />
           <Route path="/apprenant/paiements" element={

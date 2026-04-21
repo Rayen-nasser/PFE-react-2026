@@ -5,5 +5,11 @@ export const inscriptionService = {
   getMyInscriptions: () => client.get('/inscriptions/me'),
   getById: (id) => client.get(`/inscriptions/${id}`),
   create: (data) => client.post('/inscriptions', data),
-  delete: (id) => client.delete(`/inscriptions/${id}`),
+  cancel: (id) => client.put(`/inscriptions/cancel/${id}`),
+  reject: (id) => client.put(`/inscriptions/reject/${id}`),
+  reactivate: (id) => client.put(`/inscriptions/reactivate/${id}`),
+};
+
+export const paiementService = {
+  confirm: (id) => client.post(`/paiements/confirm/${id}`),
 };

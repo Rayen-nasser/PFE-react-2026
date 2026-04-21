@@ -25,13 +25,12 @@ export default function ApprenantPaiements() {
   };
 
   const total = paiements.reduce((s, p) => s + (p.montant || 0), 0);
-  const completedTotal = paiements.filter(p => p.statut === 'complete').reduce((s, p) => s + (p.montant || 0), 0);
+  const completedTotal = paiements.filter(p => p.statut === 'confirme').reduce((s, p) => s + (p.montant || 0), 0);
 
   const statusMeta = {
-    complete: { label: 'Completed', color: '#4aa87d', bg: 'rgba(74,168,125,0.1)' },
+    confirme: { label: 'Confirmed', color: '#4aa87d', bg: 'rgba(74,168,125,0.1)' },
     en_attente: { label: 'Pending', color: '#c8a86e', bg: 'rgba(200,168,110,0.1)' },
-    echoue: { label: 'Failed', color: '#e07070', bg: 'rgba(220,110,110,0.1)' },
-    annule: { label: 'Cancelled', color: '#6a9fd8', bg: 'rgba(106,159,216,0.1)' },
+    refuse: { label: 'Rejected', color: '#e07070', bg: 'rgba(220,110,110,0.1)' },
   };
 
   return (
@@ -125,10 +124,10 @@ export default function ApprenantPaiements() {
                 </div>
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{ fontSize: 15, fontWeight: 500, color: '#e8e4dc', marginBottom: 4 }}>
-                    {p.formationId?.titre || p.description || 'Course Payment'}
+                    {p.formation?.titre || p.formationId?.titre || 'Course Payment'}
                   </div>
                   <div style={{ fontSize: 12, color: '#555' }}>
-                    {p.mode || 'Card'} &middot; {formatDate(p.createdAt)}
+                    {p.methodePaiement || 'Card'} &middot; {formatDate(p.createdAt)}
                   </div>
                 </div>
                 <div style={{ textAlign: 'right', flexShrink: 0 }}>

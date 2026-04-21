@@ -28,4 +28,8 @@ export {
   contentService,
 } from '../features/formations/services/content';
 
+export {
+  notificationService,
+} from '../features/notifications/services/notifications';
+
 export { default } from './client';

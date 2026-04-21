@@ -25,13 +25,42 @@ export default function ResponsableInscriptions() {
     }
   };
 
-  const handleDelete = async (id) => {
-    if (!window.confirm('Are you sure you want to delete this inscription?')) return;
+  const [actionLoading, setActionLoading] = useState(null);
+
+  const handleAccept = async (id) => {
+    setActionLoading(id);
     try {
-      await inscriptionService.delete(id);
+      await paiementService.confirm(id);
       fetchInscriptions();
-    } catch {
-      setError('Failed to delete inscription');
+    } catch (err) {
+      setError(err.response?.data?.message || 'Failed to accept inscription');
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
+  const handleReject = async (id) => {
+    if (!window.confirm('Are you sure you want to reject this inscription?')) return;
+    setActionLoading(id);
+    try {
+      await inscriptionService.reject(id);
+      fetchInscriptions();
+    } catch (err) {
+      setError(err.response?.data?.message || 'Failed to reject inscription');
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
+  const handleReactivate = async (id) => {
+    setActionLoading(id);
+    try {
+      await inscriptionService.reactivate(id);
+      fetchInscriptions();
+    } catch (err) {
+      setError(err.response?.data?.message || 'Failed to reactivate inscription');
+    } finally {
+      setActionLoading(null);
     }
   };
 
@@ -41,8 +70,14 @@ export default function ResponsableInscriptions() {
 
   const statusColors = {
     'en attente': { bg: 'rgba(200,168,110,.15)', color: '#c8a86e' },
-    'acceptée': { bg: 'rgba(74,168,125,.15)', color: '#4aa87d' },
-    'refusée': { bg: 'rgba(224,112,112,.15)', color: '#e07070' },
+    'acceptee': { bg: 'rgba(74,168,125,.15)', color: '#4aa87d' },
+    'refusee': { bg: 'rgba(224,112,112,.15)', color: '#e07070' },
+  };
+
+  const statusLabels = {
+    'en attente': 'Pending',
+    'acceptee': 'Accepted',
+    'refusee': 'Rejected',
   };
 
   return (
@@ -70,8 +105,11 @@ export default function ResponsableInscriptions() {
         .ri-apprenant-email { font-size: 12px; color: #555; }
 
         .ri-btn { padding: 6px 12px; border-radius: 6px; font-size: 12px; cursor: pointer; transition: all 0.2s; border: 1px solid rgba(255,255,255,0.1); background: transparent; font-family: 'DM Sans', sans-serif; }
-        .ri-btn-delete { color: #e07070; }
-        .ri-btn-delete:hover { background: rgba(224,112,112,0.15); }
+        .ri-btn-accept { color: #4aa87d; }
+        .ri-btn-accept:hover { background: rgba(74,168,125,0.15); }
+        .ri-btn-reject { color: #e07070; }
+        .ri-btn-reject:hover { background: rgba(224,112,112,0.15); }
+        .ri-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
         .ri-empty { text-align: center; padding: 60px 20px; color: #555; }
         .ri-error { padding: 12px 16px; background: rgba(224,112,112,0.1); border: 1px solid rgba(224,112,112,0.3); border-radius: 8px; color: #e07070; font-size: 14px; margin-bottom: 20px; }
@@ -91,11 +129,11 @@ export default function ResponsableInscriptions() {
           <div className="ri-stat-label">Pending</div>
         </div>
         <div className="ri-stat">
-          <div className="ri-stat-val" style={{ color: '#4aa87d' }}>{inscriptions.filter(i => i.statut === 'acceptée').length}</div>
+          <div className="ri-stat-val" style={{ color: '#4aa87d' }}>{inscriptions.filter(i => i.statut === 'acceptee').length}</div>
           <div className="ri-stat-label">Accepted</div>
         </div>
         <div className="ri-stat">
-          <div className="ri-stat-val" style={{ color: '#e07070' }}>{inscriptions.filter(i => i.statut === 'refusée').length}</div>
+          <div className="ri-stat-val" style={{ color: '#e07070' }}>{inscriptions.filter(i => i.statut === 'refusee').length}</div>
           <div className="ri-stat-label">Rejected</div>
         </div>
       </div>
@@ -104,8 +142,8 @@ export default function ResponsableInscriptions() {
         <select className="ri-select" value={statusFilter} onChange={e => setStatusFilter(e.target.value)}>
           <option value="">All Status</option>
           <option value="en attente">Pending</option>
-          <option value="acceptée">Accepted</option>
-          <option value="refusée">Rejected</option>
+          <option value="acceptee">Accepted</option>
+          <option value="refusee">Rejected</option>
         </select>
       </div>
 
@@ -131,25 +169,62 @@ export default function ResponsableInscriptions() {
                   <td>
                     <div className="ri-apprenant">
                       <div className="ri-avatar">
-                        {inscription.apprenantId?.prenom?.[0]}{inscription.apprenantId?.nom?.[0]}
+                        {inscription.apprenantPrenom?.[0]}{inscription.apprenantNom?.[0]}
                       </div>
                       <div>
                         <div className="ri-apprenant-name">
-                          {inscription.apprenantId?.prenom} {inscription.apprenantId?.nom}
+                          {inscription.apprenantPrenom} {inscription.apprenantNom}
                         </div>
-                        <div className="ri-apprenant-email">{inscription.apprenantId?.email}</div>
+                        {inscription.apprenantEmail && (
+                          <div className="ri-apprenant-email">{inscription.apprenantEmail}</div>
+                        )}
                       </div>
                     </div>
                   </td>
-                  <td>{inscription.formationId?.titre || 'Unknown'}</td>
+                  <td>{inscription.formationTitre || inscription.formationId || 'Unknown'}</td>
                   <td>
                     <span className="ri-badge" style={statusColors[inscription.statut] || { bg: 'rgba(136,136,136,.15)', color: '#888' }}>
-                      {inscription.statut}
+                      {statusLabels[inscription.statut] || inscription.statut}
                     </span>
                   </td>
                   <td style={{ color: '#555' }}>{new Date(inscription.createdAt).toLocaleDateString()}</td>
-                  <td>
-                    <button className="ri-btn ri-btn-delete" onClick={() => handleDelete(inscription._id)}>Delete</button>
+                  <td style={{ display: 'flex', gap: 8 }}>
+                    {inscription.statut === 'en attente' && (
+                      <>
+                        <button 
+                          className="ri-btn ri-btn-accept" 
+                          onClick={() => handleAccept(inscription._id)}
+                          disabled={actionLoading === inscription._id}
+                        >
+                          {actionLoading === inscription._id ? '...' : 'Accept'}
+                        </button>
+                        <button 
+                          className="ri-btn ri-btn-reject" 
+                          onClick={() => handleReject(inscription._id)}
+                          disabled={actionLoading === inscription._id}
+                        >
+                          Reject
+                        </button>
+                      </>
+                    )}
+                    {inscription.statut === 'acceptee' && (
+                      <button 
+                        className="ri-btn ri-btn-reject" 
+                        onClick={() => handleReject(inscription._id)}
+                        disabled={actionLoading === inscription._id}
+                      >
+                        Revoke
+                      </button>
+                    )}
+                    {inscription.statut === 'refusee' && (
+                      <button 
+                        className="ri-btn ri-btn-accept" 
+                        onClick={() => handleReactivate(inscription._id)}
+                        disabled={actionLoading === inscription._id}
+                      >
+                        Reactivate
+                      </button>
+                    )}
                   </td>
                 </tr>
               ))}

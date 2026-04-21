@@ -84,7 +84,11 @@ export default function ApprenantFormations() {
       ) : (
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: 20 }}>
           {filteredInscriptions.filter(ins => ins.formationId).map(ins => (
-            <Link key={ins._id} to={`/formations/${ins.formationId}`} style={{ textDecoration: 'none' }}>
+            <Link 
+                  key={ins._id} 
+                  to={ins.statut === 'acceptee' ? `/apprenant/learn/${ins.formationId}` : '/apprenant/paiements'} 
+                  style={{ textDecoration: 'none' }}
+                >
               <div style={{
                 background: 'rgba(255,255,255,0.02)',
                 border: '1px solid rgba(255,255,255,0.06)',
@@ -121,7 +125,7 @@ export default function ApprenantFormations() {
                       {ins.duree || 0}h total
                     </span>
                     <span style={{ color: '#7ca8d4', fontSize: 12 }}>
-                      View Course →
+                      {ins.statut === 'acceptee' ? 'Continue Learning →' : 'View Payment →'}
                     </span>
                   </div>
                 </div>

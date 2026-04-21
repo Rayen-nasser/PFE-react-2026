@@ -5,18 +5,17 @@ export const inscriptionService = {
   getMyInscriptions: ()         => client.get('/inscriptions/me'),
   getById:           (id)       => client.get(`/inscriptions/${id}`),
   create:            (data)     => client.post('/inscriptions', data),
-  update:            (id, data) => client.put(`/inscriptions/${id}`, data),
-  delete:            (id)       => client.delete(`/inscriptions/${id}`),
+  cancel:            (id)       => client.put(`/inscriptions/cancel/${id}`),
 };
 
 export const paiementService = {
   getAll:         ()         => client.get('/paiements'),
-  getMyPaiements: ()         => client.get('/paiements/my'),
+  getMyPaiements: ()         => client.get('/paiements/my-paiements'),
   getById:        (id)       => client.get(`/paiements/${id}`),
   create:         (data)     => client.post('/paiements', data),
-  update:         (id, data) => client.put(`/paiements/${id}`, data),
-  confirm:        (id)       => client.put(`/paiements/${id}/confirm`),
-  cancel:         (id)       => client.put(`/paiements/${id}/cancel`),
+  update:         (id, data) => client.put(`/paiements/${id}`),
+  confirm:        (id)       => client.post(`/paiements/confirm/${id}`),
+  cancel:         (id)       => client.put(`/paiements/cancel/${id}`),
 };
 
 export const favoriService = {

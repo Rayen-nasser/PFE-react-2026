@@ -45,6 +45,7 @@ const FormationDetail = () => {
   const [error, setError] = useState('');
   const [enrolling, setEnrolling] = useState(false);
   const [enrolled, setEnrolled] = useState(false);
+  const [checkingEnrollment, setCheckingEnrollment] = useState(true);
   const [favorited, setFavorited] = useState(false);
   const [favoriId, setFavoriId] = useState(null);
   const [activeTab, setActiveTab] = useState('content'); // 'content' | 'reviews'
@@ -89,31 +90,40 @@ const FormationDetail = () => {
   };
 
   useEffect(() => {
+    setCheckingEnrollment(true);
+    setEnrolled(false);
+    
     formationService.getById(id).then(r => setFormation(r.data.data || r.data)).catch(console.error);
     leconService.getByFormation(id).then(r => setLecons(r.data.data || r.data)).catch(console.error);
     avisService.getByFormation(id).then(r => setAvis(r.data.data || r.data)).catch(console.error);
 
     if (user) {
-      // Check if user is already enrolled
       inscriptionService.getMyInscriptions().then(r => {
         const inscriptions = r.data.data || r.data || [];
         const isEnrolled = inscriptions.some(ins =>
-          ins.formation?._id === id || ins.formation === id
+          ins.formationId === id ||
+          ins.formation?._id === id ||
+          ins.formation === id
         );
-        if (isEnrolled) {
-          setEnrolled(true);
-        }
-      }).catch(() => {});
+        setEnrolled(isEnrolled);
+        setCheckingEnrollment(false);
+      }).catch(() => {
+        setCheckingEnrollment(false);
+      });
 
-      // Try to get favorites - handle 403 gracefully
       favoriService.getMyFavoris().then(r => {
         const favs = r.data.data || r.data || [];
-        const isFav = favs.find(f => f.cibleId?._id === id || f.cibleId === id);
+        const isFav = favs.find(f =>
+          f.cibleId === id ||
+          f.cibleId?._id === id
+        );
         if (isFav) {
           setFavorited(true);
           setFavoriId(isFav._id);
         }
       }).catch(() => {});
+    } else {
+      setCheckingEnrollment(false);
     }
   }, [id, user]);
 
@@ -299,6 +309,7 @@ const FormationDetail = () => {
         .fd-enroll-btn:hover:not(:disabled) { opacity: 0.9; transform: translateY(-1px); }
         .fd-enroll-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
         .fd-enroll-btn.done { background: linear-gradient(135deg, #4aa87d, #3d9068); box-shadow: 0 4px 18px rgba(74,168,125,0.2); }
+        .fd-enroll-btn.done:hover { opacity: 0.9; }
 
         .fd-fav-btn { width: 100%; padding: 11px; border-radius: 11px; border: 1px solid rgba(255,255,255,0.09); background: transparent; color: ${favorited ? '#e07070' : '#666'}; font-size: 13px; font-family: 'DM Sans', sans-serif; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 7px; transition: all 0.2s; margin-bottom: 18px; }
         .fd-fav-btn:hover { border-color: rgba(220,80,80,0.3); color: #e07070; }
@@ -413,21 +424,36 @@ const FormationDetail = () => {
 
           {/* Enroll card */}
           <div className="fd-enroll-card">
-            {enrolled ? (
+            {checkingEnrollment ? (
+              <div style={{ textAlign: 'center', padding: '40px 20px' }}>
+                <div className="fd-spin" style={{ margin: '0 auto 16px' }} />
+                <p style={{ color: '#666', fontSize: 13, margin: 0 }}>Checking enrollment...</p>
+              </div>
+            ) : enrolled ? (
               <div style={{ textAlign: 'center', padding: '10px 0' }}>
-                <div style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 48, height: 48, borderRadius: '50%', background: 'rgba(180,145,90,0.1)', color: '#b4915a', marginBottom: 12 }}>
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" /><polyline points="22 4 12 14.01 9 11.01" /></svg>
+                <div style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 64, height: 64, borderRadius: '50%', background: 'rgba(74,168,125,0.15)', color: '#4aa87d', marginBottom: 16 }}>
+                  <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                    <polyline points="22 4 12 14.01 9 11.01"/>
+                  </svg>
                 </div>
-                <h3 style={{ margin: '0 0 8px 0', color: '#e8e4dc', fontSize: 18 }}>You have access</h3>
-                <p style={{ margin: '0 0 20px 0', color: '#888', fontSize: 14 }}>Dive right into the lessons below to begin learning.</p>
+                <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '6px 14px', background: 'rgba(74,168,125,0.1)', border: '1px solid rgba(74,168,125,0.3)', borderRadius: 20, color: '#4aa87d', fontSize: 12, marginBottom: 12 }}>
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <polyline points="20 6 9 17 4 12"/>
+                  </svg>
+                  You own this course
+                </div>
+                <h3 style={{ margin: '0 0 8px 0', color: '#e8e4dc', fontSize: 20, fontFamily: "'Cormorant Garamond', serif", fontWeight: 400 }}>Ready to learn?</h3>
+                <p style={{ margin: '0 0 20px 0', color: '#888', fontSize: 14 }}>Continue where you left off</p>
                 <button
-                  className="fd-enroll-btn"
-                  onClick={() => {
-                    setActiveTab('content');
-                    window.scrollTo({ top: 500, behavior: 'smooth' });
-                  }}
+                  className="fd-enroll-btn done"
+                  onClick={() => navigate(`/apprenant/learn/${id}`)}
+                  style={{ background: 'linear-gradient(135deg, #4aa87d, #3d9068)', boxShadow: '0 4px 18px rgba(74,168,125,0.25)' }}
                 >
-                  Go to Content
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <polygon points="5 3 19 12 5 21 5 3"/>
+                  </svg>
+                  Continue Learning
                 </button>
               </div>
             ) : (
@@ -445,34 +471,53 @@ const FormationDetail = () => {
                 )}
 
                 <button
-                  className={`fd-enroll-btn${enrolled ? ' done' : ''}`}
+                  className="fd-enroll-btn"
                   onClick={handleInscription}
-                  disabled={enrolling || enrolled}
+                  disabled={enrolling}
                 >
-                  {enrolled
-                    ? <><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><polyline points="20 6 9 17 4 12" /></svg> Enrolled!</>
-                    : enrolling
-                      ? <><div className="fd-inline-spin" /> Processing…</>
-                      : 'Enroll Now'
-                  }
+                  {enrolling ? (
+                    <><div className="fd-inline-spin" /> Processing…</>
+                  ) : (
+                    <>
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <rect x="1" y="4" width="22" height="16" rx="2" ry="2"/>
+                        <line x1="1" y1="10" x2="23" y2="10"/>
+                      </svg>
+                      Enroll Now
+                    </>
+                  )}
                 </button>
                 <p className="fd-enroll-hint" style={{ marginTop: 12, marginBottom: 0 }}>
-                  {user ? '🔒 Secure enrollment' : <><Link to="/login" style={{ color: '#b4915a' }}>Sign in</Link> to enroll</>}
+                  {user ? (
+                    <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                        <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                      </svg>
+                      Secure enrollment
+                    </span>
+                  ) : (
+                    <><Link to="/login" style={{ color: '#b4915a' }}>Sign in</Link> to enroll</>
+                  )}
                 </p>
               </>
             )}
 
-            <button className="fd-fav-btn" onClick={handleFavorite} style={{ marginTop: 16 }}>
-              <svg width="14" height="14" viewBox="0 0 24 24" fill={favorited ? '#e07070' : 'none'} stroke={favorited ? '#e07070' : 'currentColor'} strokeWidth="2"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z" /></svg>
-              {favorited ? 'Saved to Favorites' : 'Save to Favorites'}
-            </button>
+            {!checkingEnrollment && (
+              <>
+                <button className="fd-fav-btn" onClick={handleFavorite} style={{ marginTop: enrolled ? 0 : 16 }}>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill={favorited ? '#e07070' : 'none'} stroke={favorited ? '#e07070' : 'currentColor'} strokeWidth="2"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z" /></svg>
+                  {favorited ? 'Saved to Favorites' : 'Save to Favorites'}
+                </button>
 
-            <div className="fd-card-divider" />
-            <div className="fd-card-row"><span className="fd-card-lbl">Duration</span><span className="fd-card-val">{formation.duree ?? formation.duration}h total</span></div>
-            <div className="fd-card-row"><span className="fd-card-lbl">Lessons</span><span className="fd-card-val">{lecons.length}</span></div>
-            {totalDuration > 0 && <div className="fd-card-row"><span className="fd-card-lbl">Content</span><span className="fd-card-val">{totalDuration} min</span></div>}
-            <div className="fd-card-row"><span className="fd-card-lbl">Language</span><span className="fd-card-val">FR / AR</span></div>
-            <div className="fd-card-row"><span className="fd-card-lbl">Access</span><span className="fd-card-val">Lifetime</span></div>
+                <div className="fd-card-divider" />
+                <div className="fd-card-row"><span className="fd-card-lbl">Duration</span><span className="fd-card-val">{formation.duree ?? formation.duration}h total</span></div>
+                <div className="fd-card-row"><span className="fd-card-lbl">Lessons</span><span className="fd-card-val">{lecons.length}</span></div>
+                {totalDuration > 0 && <div className="fd-card-row"><span className="fd-card-lbl">Content</span><span className="fd-card-val">{totalDuration} min</span></div>}
+                <div className="fd-card-row"><span className="fd-card-lbl">Language</span><span className="fd-card-val">FR / AR</span></div>
+                <div className="fd-card-row"><span className="fd-card-lbl">Access</span><span className="fd-card-val">Lifetime</span></div>
+              </>
+            )}
           </div>
         </div>
 

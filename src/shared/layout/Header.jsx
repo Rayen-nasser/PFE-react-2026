@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import NotificationBell from '../../features/notifications/components/NotificationBell';
 
 const Header = () => {
   const { user, logout } = useAuth();
@@ -262,6 +263,7 @@ const Header = () => {
           </nav>
 
           <div className="hd-right">
+            {user && <NotificationBell />}
             {user ? (
               <div className="hd-user-wrapper" ref={userMenuRef}>
                 <div className="hd-user-chip" onClick={() => setUserMenuOpen(o => !o)}>
@@ -407,6 +409,7 @@ const Header = () => {
         {user && (
           <>
             <Link to="/profile" className={`hd-drawer-link${isActive('/profile') ? ' active' : ''}`}>My Profile</Link>
+            <div className="hd-drawer-divider" />
             {user.role === 'apprenant' && (
               <>
                 <div className="hd-drawer-section">My Learning</div>
