@@ -402,7 +402,7 @@ export default function ResponsableFormations() {
     setLoading(true);
     try {
       const [formationsRes, centresRes, categoriesRes, formateursRes] = await Promise.all([
-        formationService.getAll(),
+        formationService.getMyCentre(),
         centreService.getMyCentres(),
         categorieService.getAll(),
         formationService.getAvailableFormateurs(),

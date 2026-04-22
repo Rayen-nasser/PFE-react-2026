@@ -26,7 +26,7 @@ export default function ResponsableDashboard() {
     try {
       const [centresRes, formationsRes, inscriptionsRes, paymentsRes] = await Promise.all([
         centreService.getMyCentres(),
-        formationService.getAll(),
+        formationService.getMyCentre(),
         inscriptionService.getAll(),
         paymentService.getAll(),
       ]);
@@ -38,7 +38,7 @@ export default function ResponsableDashboard() {
 
       const pendingInscriptions = inscriptions.filter(i => i.statut === 'en attente').length;
       const revenue = payments
-        .filter(p => p.statut === 'confirmé')
+        .filter(p => p.statut === 'confirme')
         .reduce((sum, p) => sum + (p.montant || 0), 0);
       const pendingPayments = payments
         .filter(p => p.statut === 'en_attente')

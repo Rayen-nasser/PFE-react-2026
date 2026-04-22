@@ -2,6 +2,8 @@ import client from '../../../services/client';
 
 const formationService = {
   getAll:       (params) => client.get('/formations', { params }),
+  getMyAssignments: () => client.get('/formations/my-assignments'),
+  getMyCentre:    () => client.get('/formations/my-centre'),
   getById:      (id)     => client.get(`/formations/${id}`),
   getByCentre:  (id)     => client.get('/formations', { params: { centreId: id } }),
   getByCategorie:(id)    => client.get('/formations', { params: { categorieId: id } }),
