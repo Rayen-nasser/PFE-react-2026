@@ -440,6 +440,25 @@ const Profile = () => {
   };
 
   const handleSave = async () => {
+    const err = (() => {
+      if (formData.telephone && !/^(?:\+216|00216)?[ ]?[24579][0-9]{7}$/.test(formData.telephone)) {
+        return 'Invalid Tunisian phone number format';
+      }
+      if (formData.dateNaissance) {
+        const birth = new Date(formData.dateNaissance);
+        const now = new Date();
+        if (birth >= now) return 'Birth date must be in the past';
+        const age = now.getFullYear() - birth.getFullYear();
+        if (age < 13) return 'You must be at least 13 years old';
+      }
+      return null;
+    })();
+
+    if (err) {
+      setError(err);
+      return;
+    }
+
     setSaving(true); setError(''); setSuccess('');
     try {
       let dataToSend;
@@ -510,6 +529,10 @@ const Profile = () => {
     }
     if (passwordData.newPassword.length < 8) {
       setError('Password must be at least 8 characters');
+      return;
+    }
+    if (!/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/.test(passwordData.newPassword)) {
+      setError('Password must contain one uppercase letter, one lowercase letter, and one number');
       return;
     }
     setChangingPw(true); setError('');
@@ -583,7 +606,8 @@ const Profile = () => {
 
         .pf-input { flex: 1; padding: 8px 12px; background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.12); border-radius: 7px; font-size: 13px; color: #e8e4dc; font-family: 'DM Sans', sans-serif; outline: none; transition: border-color .2s; }
         .pf-input:focus { border-color: #b4915a; }
-        .pf-select { appearance: none; cursor: pointer; }
+        .pf-select { appearance: none; cursor: pointer; color-scheme: dark; }
+        .pf-select option { background: #1a1a1e; color: #e8e4dc; }
 
         .pf-actions { display: flex; gap: 10px; }
         .pf-btn-edit { display: flex; align-items: center; gap: 6px; padding: 8px 16px; background: rgba(180,145,90,.1); border: 1px solid rgba(180,145,90,.25); border-radius: 8px; color: #b4915a; font-size: 13px; font-family: 'DM Sans', sans-serif; cursor: pointer; transition: all .2s; }

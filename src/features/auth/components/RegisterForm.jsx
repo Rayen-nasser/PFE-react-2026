@@ -124,19 +124,35 @@ const RegisterForm = () => {
   const validate0 = () => {
     const e = {};
     if (!formData.nom.trim())                       e.nom     = 'Required';
+    else if (formData.nom.trim().length < 2)        e.nom     = 'Min 2 characters';
     if (!formData.prenom.trim())                    e.prenom  = 'Required';
+    else if (formData.prenom.trim().length < 2)     e.prenom  = 'Min 2 characters';
     if (!formData.email)                            e.email   = 'Required';
     else if (!/\S+@\S+\.\S+/.test(formData.email)) e.email   = 'Invalid email';
     if (!formData.password)                         e.password = 'Required';
     else if (formData.password.length < 8)          e.password = 'Min 8 characters';
     if (!formData.confirmPassword)                  e.confirmPassword = 'Required';
     else if (formData.password !== formData.confirmPassword) e.confirmPassword = 'Passwords do not match';
+    
+    if (formData.telephone && !/^(?:\+216|00216)?[ ]?[24579][0-9]{7}$/.test(formData.telephone)) {
+      e.telephone = 'Invalid Tunisian phone number format';
+    }
     return e;
   };
   const validate1 = () => ({});
   const validate2 = () => {
     const e = {};
     if (!formData.role) e.role = 'Please select a role';
+    if (formData.dateNaissance) {
+      const birth = new Date(formData.dateNaissance);
+      const now = new Date();
+      if (birth >= now) {
+        e.dateNaissance = 'Birth date must be in the past';
+      } else {
+        const age = now.getFullYear() - birth.getFullYear();
+        if (age < 13) e.dateNaissance = 'You must be at least 13 years old';
+      }
+    }
     return e;
   };
   const validators = [validate0, validate1, validate2];
@@ -310,8 +326,9 @@ const RegisterForm = () => {
               <div className="rf-field">
                 <label className="rf-label">Date of Birth</label>
                 <div className="rf-input-wrap">
-                  <input type="date" name="dateNaissance" value={formData.dateNaissance} onChange={change} className="rf-input" />
+                  <input type="date" name="dateNaissance" value={formData.dateNaissance} onChange={change} onBlur={() => blur('dateNaissance')} className={`rf-input${touched.dateNaissance && fieldErrors.dateNaissance ? ' err' : ''}`} />
                 </div>
+                {touched.dateNaissance && fieldErrors.dateNaissance && <p className="rf-field-error">{fieldErrors.dateNaissance}</p>}
               </div>
             </div>
             <div className="rf-field">
@@ -430,7 +447,8 @@ const RegisterForm = () => {
         .rf-input:focus { border-color: #b4915a; background: rgba(180,145,90,.05); }
         .rf-input.err { border-color: rgba(220,53,53,.5); }
         .rf-input.has-icon { padding-right: 48px; }
-        .rf-select { appearance: none; cursor: pointer; }
+        .rf-select { appearance: none; cursor: pointer; color-scheme: dark; }
+        .rf-select option { background: #1a1a1e; color: #e8e4dc; }
         .rf-eye {
           position: absolute; right: 14px; top: 50%; transform: translateY(-50%);
           background: none; border: none; color: #666; cursor: pointer; padding: 4px;
