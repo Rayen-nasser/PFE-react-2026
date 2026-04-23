@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { formationService } from '../services/formation';
 import { centreService } from '../services/centre';
 import categorieService from '../../formations/services/categories';
+import skillService from '../../profile/services/skill';
 import ResponsableCFLayout from '../components/ResponsableCFLayout';
 
 // ── Toast hook ────────────────────────────────────────────────────────────────
@@ -140,14 +141,15 @@ function FormationCard({ formation, onEdit, onDelete, onAssign }) {
 }
 
 // ── Formation Form Modal ──────────────────────────────────────────────────────
-function FormationModal({ editing, centres, categories, onClose, onSubmit }) {
+function FormationModal({ editing, centres, categories, allSkills, onClose, onSubmit }) {
   const [formData, setFormData] = useState({
     titre: editing?.titre || '',
     description: editing?.description || '',
     prix: editing?.prix ?? 0,
     duree: editing?.duree ?? 0,
-    centreId: editing?.centreId?._id || '',
+    centreId: editing?.centreId?._id || (centres.length === 1 ? centres[0]._id : ''),
     categorieId: editing?.categorieId?._id || '',
+    requiredSkills: editing?.requiredSkills?.map(s => s._id || s) || [],
     image: null,
   });
   const [imagePreview, setImagePreview] = useState(editing?.image || '');
@@ -174,6 +176,7 @@ function FormationModal({ editing, centres, categories, onClose, onSubmit }) {
       const data = new FormData();
       Object.entries(formData).forEach(([k, v]) => {
         if (k === 'image' && v) data.append('image', v);
+        else if (k === 'requiredSkills') data.append(k, JSON.stringify(v));
         else if (k !== 'image') data.append(k, v);
       });
       await onSubmit(data);
@@ -269,6 +272,53 @@ function FormationModal({ editing, centres, categories, onClose, onSubmit }) {
               </div>
             )}
           </div>
+
+          {/* Required Skills */}
+          <div style={styles.field}>
+            <label style={styles.fieldLabel}>Required Skills</label>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', maxHeight: '150px', overflowY: 'auto', padding: '12px', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '12px' }}>
+              {(allSkills || []).map(s => {
+                const isSelected = formData.requiredSkills.includes(s._id);
+                return (
+                  <label key={s._id} style={{ 
+                    display: 'flex', alignItems: 'center', gap: '6px', 
+                    padding: '5px 12px', 
+                    background: isSelected ? 'rgba(200,168,110,0.12)' : 'rgba(255,255,255,0.03)', 
+                    border: '1px solid',
+                    borderColor: isSelected ? '#c8a86e' : 'rgba(255,255,255,0.06)', 
+                    borderRadius: '16px', 
+                    cursor: 'pointer', 
+                    transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+                    userSelect: 'none',
+                    transform: isSelected ? 'translateY(-1px)' : 'none'
+                  }}>
+                    <input
+                      type="checkbox"
+                      checked={isSelected}
+                      onChange={() => {
+                        const next = isSelected 
+                          ? formData.requiredSkills.filter(id => id !== s._id)
+                          : [...formData.requiredSkills, s._id];
+                        setFormData(d => ({ ...d, requiredSkills: next }));
+                      }}
+                      style={{ display: 'none' }}
+                    />
+                    <span style={{ 
+                      fontSize: '11px', 
+                      color: isSelected ? '#f0ebe0' : '#555',
+                      fontWeight: isSelected ? '500' : '400',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '4px'
+                    }}>
+                      {isSelected && <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>}
+                      {s.name}
+                    </span>
+                  </label>
+                );
+              })}
+            </div>
+          </div>
         </div>
 
         <div style={styles.modalFooter}>
@@ -283,7 +333,7 @@ function FormationModal({ editing, centres, categories, onClose, onSubmit }) {
 }
 
 // ── Assign Formateurs Modal ───────────────────────────────────────────────────
-function AssignModal({ formation, formateurs, onClose, onAssign }) {
+function AssignModal({ formation, formateurs, onClose, onAssign, loadingSuitable }) {
   const [selected, setSelected] = useState([]);
   const [assigning, setAssigning] = useState(false);
 
@@ -312,10 +362,14 @@ function AssignModal({ formation, formateurs, onClose, onAssign }) {
 
         <div style={{ ...styles.modalBody, maxHeight: 400 }}>
           <div style={{ fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.08em', color: '#555', marginBottom: 14 }}>
-            Assign or remove formateurs ({selected.length} selected)
+            {loadingSuitable ? 'Finding best matches...' : `Assign or remove formateurs (${selected.length} selected)`}
           </div>
           
-          {formateurs.length === 0
+          {loadingSuitable ? (
+            <div style={{ textAlign: 'center', padding: '40px 0' }}>
+              <div style={{ width: 24, height: 24, borderRadius: '50%', border: '2px solid rgba(255,255,255,0.06)', borderTopColor: '#c8a86e', animation: 'toastIn .8s linear infinite', margin: '0 auto' }} />
+            </div>
+          ) : formateurs.length === 0
             ? <div style={{ textAlign: 'center', padding: '40px 0', color: '#555' }}>
                 <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" style={{ marginBottom: 12, opacity: 0.3 }}><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
                 <p>No formateurs available in the system</p>
@@ -346,12 +400,45 @@ function AssignModal({ formation, formateurs, onClose, onAssign }) {
                           }
                         </div>
                         <div style={{ flex: 1, minWidth: 0 }}>
-                          <div style={{ fontSize: 14, color: isSelected ? '#c8a86e' : '#e8e4dc', fontWeight: 500, transition: 'color .2s' }}>
+                          <div style={{ fontSize: 14, color: isSelected ? '#c8a86e' : '#e8e4dc', fontWeight: 500, transition: 'color .2s', display: 'flex', alignItems: 'center', gap: '8px' }}>
                             {f.prenom} {f.nom}
+                            {f.matchCount > 0 && (
+                               <span style={{ 
+                                 fontSize: '10px', 
+                                 background: 'rgba(74,168,125,0.08)', 
+                                 color: '#4aa87d', 
+                                 padding: '3px 8px', 
+                                 borderRadius: '20px', 
+                                 border: '1px solid rgba(74,168,125,0.2)',
+                                 fontWeight: '600',
+                                 letterSpacing: '0.02em',
+                                 boxShadow: '0 2px 8px rgba(74,168,125,0.05)'
+                               }}>
+                                 {f.matchCount} skill match{f.matchCount > 1 ? 'es' : ''}
+                               </span>
+                            )}
                           </div>
-                          <div style={{ fontSize: 11, color: '#555', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                          <div style={{ fontSize: 11, color: '#555', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginBottom: f.matchedSkills?.length > 0 ? '6px' : '0' }}>
                             {f.email}
                           </div>
+                          {f.matchedSkills?.length > 0 && (
+                            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '5px' }}>
+                              {f.matchedSkills.slice(0, 3).map((sk, idx) => (
+                                <span key={idx} style={{ 
+                                  fontSize: '9px', 
+                                  background: 'rgba(200,168,110,0.08)', 
+                                  color: '#c8a86e', 
+                                  padding: '2px 7px', 
+                                  borderRadius: '4px', 
+                                  border: '1px solid rgba(200,168,110,0.15)',
+                                  fontWeight: '500'
+                                }}>
+                                  {typeof sk === 'object' ? sk.name : sk}
+                                </span>
+                              ))}
+                              {f.matchedSkills.length > 3 && <span style={{ fontSize: '9px', color: '#444', alignSelf: 'center' }}>+{f.matchedSkills.length - 3}</span>}
+                            </div>
+                          )}
                         </div>
                         <div style={{ ...styles.checkCircle, ...(isSelected ? styles.checkCircleSelected : {}), width: 18, height: 18, fontSize: 10 }}>
                           {isSelected && '✓'}
@@ -383,6 +470,8 @@ export default function ResponsableFormations() {
   const [categories, setCategories] = useState([]);
   const [formateurs, setFormateurs] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [loadingSuitable, setLoadingSuitable] = useState(false);
+  const [allSkills, setAllSkills] = useState([]);
 
   const [search, setSearch] = useState('');
   const [filterCentre, setFilterCentre] = useState('');
@@ -401,20 +490,36 @@ export default function ResponsableFormations() {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const [formationsRes, centresRes, categoriesRes, formateursRes] = await Promise.all([
-        formationService.getMyCentre(),
+      const [formationsRes, centresRes, categoriesRes, formateursRes, skillsRes] = await Promise.all([
+        formationService.getAll(),
         centreService.getMyCentres(),
         categorieService.getAll(),
         formationService.getAvailableFormateurs(),
+        skillService.getAll(),
       ]);
       setFormations(formationsRes.data.data || []);
       setCentres(centresRes.data.data || []);
       setCategories(categoriesRes.data.data || []);
       setFormateurs(formateursRes.data.data || []);
+      setAllSkills(skillsRes.data.data || skillsRes.data || []);
     } catch {
       toast('Failed to load data', 'error');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleOpenAssign = async (target) => {
+    setAssignTarget(target);
+    setShowAssign(true);
+    setLoadingSuitable(true);
+    try {
+      const res = await formationService.getAvailableFormateurs(target._id);
+      setFormateurs(res.data.data || []);
+    } catch {
+      toast('Failed to load suitable formateurs', 'error');
+    } finally {
+      setLoadingSuitable(false);
     }
   };
 
@@ -553,7 +658,7 @@ export default function ResponsableFormations() {
               formation={f}
               onEdit={f => { setEditingFormation(f); setShowForm(true); }}
               onDelete={f => setConfirmTarget(f)}
-              onAssign={f => { setAssignTarget(f); setShowAssign(true); }}
+              onAssign={f => handleOpenAssign(f)}
             />
           ))}
         </div>
@@ -565,6 +670,7 @@ export default function ResponsableFormations() {
           editing={editingFormation}
           centres={centres}
           categories={categories}
+          allSkills={allSkills}
           onClose={() => { setShowForm(false); setEditingFormation(null); }}
           onSubmit={handleSubmit}
         />
@@ -573,6 +679,7 @@ export default function ResponsableFormations() {
         <AssignModal
           formation={assignTarget}
           formateurs={formateurs}
+          loadingSuitable={loadingSuitable}
           onClose={() => { setShowAssign(false); setAssignTarget(null); }}
           onAssign={handleAssign}
         />
@@ -605,7 +712,7 @@ const styles = {
   input: { width: '100%', padding: '10px 14px', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 8, color: '#e8e4dc', fontSize: 14, fontFamily: 'inherit', outline: 'none' },
   inputError: { borderColor: '#e07070' },
   textarea: { width: '100%', padding: '10px 14px', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 8, color: '#e8e4dc', fontSize: 14, fontFamily: 'inherit', outline: 'none', minHeight: 90, resize: 'vertical' },
-  select: { padding: '10px 14px', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 8, color: '#e8e4dc', fontSize: 13, fontFamily: 'inherit', cursor: 'pointer', outline: 'none' },
+  select: { padding: '10px 14px', background: '#1c1c21', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 8, color: '#e8e4dc', fontSize: 13, fontFamily: 'inherit', cursor: 'pointer', outline: 'none', colorScheme: 'dark' },
   formRow: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 },
   fileDrop: { display: 'flex', alignItems: 'center', width: '100%', padding: '14px 16px', background: 'rgba(255,255,255,0.02)', border: '1px dashed rgba(255,255,255,0.15)', borderRadius: 8, cursor: 'pointer' },
   btnPrimary: { padding: '9px 22px', borderRadius: 8, fontSize: 14, fontWeight: 600, cursor: 'pointer', border: 'none', background: 'linear-gradient(135deg, #c8a86e, #b4915a)', color: '#0c0c0e', fontFamily: 'inherit' },
