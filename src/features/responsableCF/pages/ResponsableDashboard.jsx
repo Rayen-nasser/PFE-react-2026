@@ -26,7 +26,7 @@ export default function ResponsableDashboard() {
     try {
       const [centresRes, formationsRes, inscriptionsRes, paymentsRes] = await Promise.all([
         centreService.getMyCentres(),
-        formationService.getMyCentre(),
+        formationService.getAll(),
         inscriptionService.getAll(),
         paymentService.getAll(),
       ]);
