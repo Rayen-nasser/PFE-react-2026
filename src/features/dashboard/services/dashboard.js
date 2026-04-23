@@ -13,7 +13,6 @@ export const paiementService = {
   getMyPaiements: ()         => client.get('/paiements/my-paiements'),
   getById:        (id)       => client.get(`/paiements/${id}`),
   create:         (data)     => client.post('/paiements', data),
-  update:         (id, data) => client.put(`/paiements/${id}`),
   confirm:        (id)       => client.post(`/paiements/confirm/${id}`),
   cancel:         (id)       => client.put(`/paiements/cancel/${id}`),
 };
