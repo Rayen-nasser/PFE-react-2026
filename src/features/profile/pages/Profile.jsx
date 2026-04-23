@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../../shared/context/AuthContext';
 import profileService from '../services/profile';
+import skillService from '../services/skill';
 
 /* ─── icons ─── */
 const EditIcon = () => (
@@ -379,12 +380,28 @@ const Profile = () => {
     nom: '', prenom: '', telephone: '',
     niveauEtude: '', dateNaissance: '', adresse: '',
     specialite: '', experience: '', user_image: null,
+    skills: [],
   });
+  const [allSkills, setAllSkills] = useState([]);
 
   useEffect(() => {
     if (!authLoading && !user) navigate('/login', { state: { from: { pathname: '/profile' } } });
-    else if (user) fetchProfile();
+    else if (user) {
+      fetchProfile();
+      if (user.role === 'formateur' || user.role === 'admin') {
+        fetchSkills();
+      }
+    }
   }, [user, authLoading]);
+
+  const fetchSkills = async () => {
+    try {
+      const res = await skillService.getAll();
+      setAllSkills(res.data.data || res.data || []);
+    } catch (err) {
+      console.error('Failed to fetch skills:', err);
+    }
+  };
 
   // Prevent body scroll when modal open
   useEffect(() => {
@@ -406,6 +423,7 @@ const Profile = () => {
         adresse: d.adresse || '',
         specialite: d.specialite || '',
         experience: d.experience || '',
+        skills: d.skills?.map(s => s._id || s) || [],
         user_image: null,
       });
       setImagePreview(null);
@@ -458,6 +476,7 @@ const Profile = () => {
         adresse: profile.adresse || '',
         specialite: profile.specialite || '',
         experience: profile.experience || '',
+        skills: profile.skills?.map(s => s._id || s) || [],
         user_image: null,
       });
     }
@@ -708,6 +727,72 @@ const Profile = () => {
                   <p className="pf-role-section-label">Professional Details</p>
                   <InfoRow label="Specialty" value={profile?.specialite} name="specialite" editing={editing} formData={formData} onChange={handleChange} />
                   <InfoRow label="Experience" value={profile?.experience ? `${profile.experience} year${profile.experience !== 1 ? 's' : ''}` : ''} name="experience" editing={editing} formData={formData} onChange={handleChange} type="number" />
+                  
+                  {/* Skills Section */}
+                  <div className="pf-info-row" style={{ alignItems: 'flex-start' }}>
+                    <span className="pf-info-label" style={{ marginTop: editing ? '10px' : '0' }}>Skills</span>
+                    <div style={{ flex: 1 }}>
+                      {!editing ? (
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+                          {profile?.skills?.length > 0 ? (
+                            profile.skills.map(s => (
+                              <span key={s._id || s} style={{ padding: '4px 10px', background: 'rgba(180,145,90,0.12)', border: '1px solid rgba(180,145,90,0.25)', borderRadius: '6px', fontSize: '12px', color: '#c8a86e' }}>
+                                {typeof s === 'object' ? s.name : (allSkills.find(sk => sk._id === s)?.name || s)}
+                              </span>
+                            ))
+                          ) : <span className="pf-info-empty">—</span>}
+                        </div>
+                      ) : (
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                          {allSkills.map(s => {
+                            const isSelected = formData.skills.includes(s._id);
+                            return (
+                              <label key={s._id} style={{ 
+                                display: 'flex', alignItems: 'center', gap: '6px', 
+                                padding: '6px 14px', 
+                                background: isSelected ? 'rgba(180,145,90,0.12)' : 'rgba(255,255,255,0.02)', 
+                                border: '1px solid',
+                                borderColor: isSelected ? '#b4915a' : 'rgba(255,255,255,0.08)', 
+                                borderRadius: '20px', 
+                                cursor: 'pointer', 
+                                transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+                                userSelect: 'none',
+                                transform: isSelected ? 'translateY(-1px)' : 'none',
+                                boxShadow: isSelected ? '0 4px 12px rgba(180,145,90,0.15)' : 'none'
+                              }}>
+                                <input
+                                  type="checkbox"
+                                  checked={isSelected}
+                                  onChange={() => {
+                                    const next = isSelected 
+                                      ? formData.skills.filter(id => id !== s._id)
+                                      : [...formData.skills, s._id];
+                                    setFormData(d => ({ ...d, skills: next }));
+                                  }}
+                                  style={{ display: 'none' }}
+                                />
+                                <span style={{ 
+                                  fontSize: '12px', 
+                                  color: isSelected ? '#f0ebe0' : '#555',
+                                  fontWeight: isSelected ? '500' : '400',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  gap: '5px'
+                                }}>
+                                  {isSelected ? (
+                                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>
+                                  ) : (
+                                    <span style={{ fontSize: '14px', lineHeight: 1, marginTop: '-1px', opacity: 0.5 }}>+</span>
+                                  )}
+                                  {s.name}
+                                </span>
+                              </label>
+                            );
+                          })}
+                        </div>
+                      )}
+                    </div>
+                  </div>
                 </div>
               )}
               {/* Center Details Section */}
