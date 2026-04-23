@@ -6,6 +6,7 @@ const NAV_ITEMS = [
   { path: '/admin/reports', label: 'Reports', icon: 'alert', adminOnly: true },
   { path: '/admin/statistics', label: 'Statistics', icon: 'chart', adminOnly: true },
   { path: '/admin/categories', label: 'Categories', icon: 'folder', adminOnly: true },
+  { path: '/admin/skills', label: 'Skills', icon: 'award', adminOnly: true },
 ];
 
 const ICONS = {
@@ -14,6 +15,7 @@ const ICONS = {
   alert: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>,
   chart: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>,
   folder: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>,
+  award: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><circle cx="12" cy="8" r="7"/><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/></svg>,
   back: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>,
 };
 
@@ -75,6 +77,7 @@ export default function AdminLayout({ children, title, subtitle }) {
         .al-nav-link.reports.active { color: #c8a86e; background: rgba(200,168,110,0.1); }
         .al-nav-link.statistics.active { color: #6a9fd8; background: rgba(106,159,216,0.1); }
         .al-nav-link.categories.active { color: #7dbf7d; background: rgba(125,191,125,0.1); }
+        .al-nav-link.award.active { color: #b4915a; background: rgba(180,145,90,0.1); }
         
         .al-content { max-width: 1400px; margin: 0 auto; padding: 32px 32px 48px; }
         
