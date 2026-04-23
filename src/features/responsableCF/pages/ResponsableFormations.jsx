@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { formationService } from '../services/formation';
 import { centreService } from '../services/centre';
+import { favoriService } from '../../../services/api';
 import categorieService from '../../formations/services/categories';
 import skillService from '../../profile/services/skill';
 import ResponsableCFLayout from '../components/ResponsableCFLayout';
@@ -333,7 +334,7 @@ function FormationModal({ editing, centres, categories, allSkills, onClose, onSu
 }
 
 // ── Assign Formateurs Modal ───────────────────────────────────────────────────
-function AssignModal({ formation, formateurs, onClose, onAssign, loadingSuitable }) {
+function AssignModal({ formation, formateurs, onClose, onAssign, loadingSuitable, userFavs, onToggleFav }) {
   const [selected, setSelected] = useState([]);
   const [assigning, setAssigning] = useState(false);
 
@@ -440,8 +441,29 @@ function AssignModal({ formation, formateurs, onClose, onAssign, loadingSuitable
                             </div>
                           )}
                         </div>
-                        <div style={{ ...styles.checkCircle, ...(isSelected ? styles.checkCircleSelected : {}), width: 18, height: 18, fontSize: 10 }}>
-                          {isSelected && '✓'}
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                          <button
+                            onClick={(e) => onToggleFav(f._id, 'formateur', e)}
+                            style={{
+                              background: 'none',
+                              border: 'none',
+                              padding: 0,
+                              cursor: 'pointer',
+                              color: userFavs.has(f._id) ? '#e07070' : '#444',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              transition: 'all 0.2s'
+                            }}
+                            title={userFavs.has(f._id) ? 'Remove from favorites' : 'Add to favorites'}
+                          >
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill={userFavs.has(f._id) ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="2">
+                              <path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z" />
+                            </svg>
+                          </button>
+                          <div style={{ ...styles.checkCircle, ...(isSelected ? styles.checkCircleSelected : {}), width: 18, height: 18, fontSize: 10 }}>
+                            {isSelected && '✓'}
+                          </div>
                         </div>
                       </div>
                     );
@@ -482,6 +504,7 @@ export default function ResponsableFormations() {
   const [showAssign, setShowAssign] = useState(false);
   const [assignTarget, setAssignTarget] = useState(null);
   const [confirmTarget, setConfirmTarget] = useState(null);
+  const [userFavs, setUserFavs] = useState(new Set());
 
   const { toasts, show: toast } = useToast();
 
@@ -502,6 +525,10 @@ export default function ResponsableFormations() {
       setCategories(categoriesRes.data.data || []);
       setFormateurs(formateursRes.data.data || []);
       setAllSkills(skillsRes.data.data || skillsRes.data || []);
+      
+      const favRes = await favoriService.getMyFavoris().catch(() => ({ data: { data: [] } }));
+      const favData = favRes.data.data || favRes.data;
+      setUserFavs(new Set(favData.map(f => f.cibleId?._id || f.cibleId)));
     } catch {
       toast('Failed to load data', 'error');
     } finally {
@@ -566,6 +593,28 @@ export default function ResponsableFormations() {
     } catch (err) {
       toast(err.response?.data?.message || 'Failed to assign formateurs', 'error');
       throw err;
+    }
+  };
+
+  const handleToggleFav = async (id, type, e) => {
+    e.stopPropagation();
+    try {
+      if (userFavs.has(id)) {
+        const res = await favoriService.getMyFavoris();
+        const all = res.data.data || res.data;
+        const target = all.find(f => (f.cibleId?._id || f.cibleId) === id);
+        if (target) {
+          await favoriService.remove(target._id);
+          setUserFavs(prev => { const n = new Set(prev); n.delete(id); return n; });
+          toast('Removed from favorites');
+        }
+      } else {
+        await favoriService.add({ cibleId: id, typeCible: type });
+        setUserFavs(prev => new Set([...prev, id]));
+        toast('Added to favorites');
+      }
+    } catch {
+      toast('Failed to update favorites', 'error');
     }
   };
 
@@ -682,6 +731,8 @@ export default function ResponsableFormations() {
           loadingSuitable={loadingSuitable}
           onClose={() => { setShowAssign(false); setAssignTarget(null); }}
           onAssign={handleAssign}
+          userFavs={userFavs}
+          onToggleFav={handleToggleFav}
         />
       )}
       {confirmTarget && (
