@@ -66,8 +66,9 @@ export default function ResponsablePayments() {
     <ResponsableCFLayout title="Payments" subtitle="Track revenue and transactions">
       <style>{`
         .rp-filters { display: flex; gap: 12px; margin-bottom: 24px; }
-        .rp-select { padding: 10px 16px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #e8e4dc; font-size: 14px; cursor: pointer; font-family: 'DM Sans', sans-serif; }
+        .rp-select { padding: 10px 16px; background: #1c1c21; border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #e8e4dc; font-size: 14px; cursor: pointer; font-family: 'DM Sans', sans-serif; color-scheme: dark; }
         .rp-select:focus { border-color: #4aa87d; outline: none; }
+        .rp-select option { background: #1c1c21; color: #e8e4dc; }
 
         .rp-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 32px; }
         .rp-stat { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); border-radius: 12px; padding: 20px 24px; }
