@@ -16,6 +16,7 @@ import AdminUsers from './features/admin/pages/AdminUsers';
 import AdminReports from './features/admin/pages/AdminReports';
 import AdminStatistics from './features/admin/pages/AdminStatistics';
 import AdminCategories from './features/admin/pages/AdminCategories';
+import AdminSkills from './features/admin/pages/AdminSkills';
 import ResponsableCFRoute from './features/responsableCF/components/ResponsableCFRoute';
 import ResponsableDashboard from './features/responsableCF/pages/ResponsableDashboard';
 import ResponsableCentres from './features/responsableCF/pages/ResponsableCentres';
@@ -73,6 +74,11 @@ function App() {
           <Route path="/admin/categories" element={
             <AdminRoute>
               <AdminCategories />
+            </AdminRoute>
+          } />
+          <Route path="/admin/skills" element={
+            <AdminRoute>
+              <AdminSkills />
             </AdminRoute>
           } />
           <Route path="/responsable" element={
