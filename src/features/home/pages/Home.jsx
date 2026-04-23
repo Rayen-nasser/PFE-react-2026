@@ -404,6 +404,12 @@ const Home = () => {
                   </div>
                   <div className="course-body">
                     <div className="course-title">{f.titre || f.title}</div>
+                    { (f.centreId?.nom || f.centre?.nom) && (
+                      <div className="course-centre" style={{ fontSize: '10px', color: '#666', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '4px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" /><circle cx="12" cy="10" r="3" /></svg>
+                        {f.centreId?.nom || f.centre?.nom}
+                      </div>
+                    )}
                     <div className="course-desc">{f.description}</div>
                     <div className="course-footer">
                       <div>

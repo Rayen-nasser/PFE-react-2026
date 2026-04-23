@@ -510,6 +510,7 @@ const FormationDetail = () => {
                   {favorited ? 'Saved to Favorites' : 'Save to Favorites'}
                 </button>
 
+                <div className="fd-card-row"><span className="fd-card-lbl">Center</span><span className="fd-card-val">{formation.centreId?.nom || formation.centre?.nom || '—'}</span></div>
                 <div className="fd-card-divider" />
                 <div className="fd-card-row"><span className="fd-card-lbl">Duration</span><span className="fd-card-val">{formation.duree ?? formation.duration}h total</span></div>
                 <div className="fd-card-row"><span className="fd-card-lbl">Lessons</span><span className="fd-card-val">{lecons.length}</span></div>

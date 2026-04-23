@@ -75,6 +75,11 @@ const MyInscriptions = () => {
                   <div className="mi-card-name">
                     {ins.formation?.titre || ins.formation?.title || 'Formation'}
                   </div>
+                  { (ins.formation?.centreId?.nom || ins.formation?.centre?.nom) && (
+                    <div className="mi-card-centre" style={{ fontSize: '11px', color: '#666', marginTop: '2px', textTransform: 'uppercase', letterSpacing: '0.03em' }}>
+                      {ins.formation.centreId?.nom || ins.formation.centre?.nom}
+                    </div>
+                  )}
                   <div className="mi-card-date">{formatDate(ins.createdAt)}</div>
                 </div>
                 <StatusBadge status={ins.statut || ins.status} />

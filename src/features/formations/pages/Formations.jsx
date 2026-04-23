@@ -131,6 +131,7 @@ const Formations = () => {
   /* ── Helper: get category/centre name from populated object OR raw ID ── */
   // Backend populates as `categorieId` (the schema field name), so formation.categorieId is the object
   const getCatName = (f) => f.categorieId?.nom || f.categorie?.nom || '';
+  const getCentreName = (f) => f.centreId?.nom || f.centre?.nom || '';
 
   return (
     <>
@@ -213,6 +214,7 @@ const Formations = () => {
         .fm-card-footer { display: flex; align-items: center; justify-content: space-between; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.05); }
         .fm-price { font-family: 'Cormorant Garamond', serif; font-size: 22px; font-weight: 400; color: #b4915a; }
         .fm-price-unit { font-size: 11px; color: #555; margin-left: 2px; font-family: 'DM Sans', sans-serif; }
+        .fm-card-centre { font-size: 10px; color: #666; margin-bottom: 8px; display: flex; align-items: center; gap: 4px; text-transform: uppercase; letter-spacing: 0.05em; }
         .fm-dur { font-size: 11px; color: #444; display: flex; align-items: center; gap: 4px; }
 
         .fm-skel-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(234px, 1fr)); gap: 16px; }
@@ -436,6 +438,7 @@ const Formations = () => {
                   </div>
                 ) : formations.map((f, i) => {
                   const catName = getCatName(f);
+                  const centreName = getCentreName(f);
                   const imgUrl = f.image; // full URL already sanitized by backend
                   return (
                     <Link
@@ -456,6 +459,12 @@ const Formations = () => {
                       </div>
                       <div className="fm-card-body">
                         <div className="fm-card-title">{f.titre}</div>
+                        {centreName && (
+                          <div className="fm-card-centre">
+                            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" /><circle cx="12" cy="10" r="3" /></svg>
+                            {centreName}
+                          </div>
+                        )}
                         <div className="fm-card-desc">{f.description}</div>
                         <div className="fm-card-footer">
                           <div>
