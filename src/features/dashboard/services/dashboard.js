@@ -10,11 +10,11 @@ export const inscriptionService = {
 
 export const paiementService = {
   getAll:         ()         => client.get('/paiements'),
-  getMyPaiements: ()         => client.get('/paiements/my-paiements'),
+  getMyPaiements: ()         => client.get('/paiements/me'),
   getById:        (id)       => client.get(`/paiements/${id}`),
   create:         (data)     => client.post('/paiements', data),
   confirm:        (id)       => client.post(`/paiements/confirm/${id}`),
-  cancel:         (id)       => client.put(`/paiements/cancel/${id}`),
+  cancel:         (id)       => client.put(`/paiements/${id}/cancel`),
 };
 
 export const favoriService = {
