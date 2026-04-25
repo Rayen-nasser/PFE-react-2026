@@ -684,7 +684,7 @@ const FormationDetail = () => {
                     <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 12 }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                         {a.apprenantId?.user_image ? (
-                          <img src={`http://localhost:5000/${a.apprenantId.user_image}`} alt={a.apprenantId?.prenom || 'User'} style={{ width: 34, height: 34, borderRadius: '50%', objectFit: 'cover' }} />
+                          <img src={a.apprenantId.user_image.startsWith('http') ? a.apprenantId.user_image : `http://localhost:5000/${a.apprenantId.user_image}`} alt={a.apprenantId?.prenom || 'User'} style={{ width: 34, height: 34, borderRadius: '50%', objectFit: 'cover' }} />
                         ) : (
                           <div style={{ width: 34, height: 34, borderRadius: '50%', background: 'rgba(180,145,90,0.2)', color: '#b4915a', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14, fontWeight: 'bold' }}>
                             {((a.apprenantId?.prenom?.[0]) || (a.apprenantId?.nom?.[0]) || 'U').toUpperCase()}
