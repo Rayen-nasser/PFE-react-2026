@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import centreService from '../services/centres';
 import FixDocumentsModal from '../components/FixDocumentsModal';
+import ResponsableCFLayout from '../../responsableCF/components/ResponsableCFLayout';
 
 export default function MyRequests() {
   const [centres, setCentres] = useState([]);
@@ -9,6 +10,9 @@ export default function MyRequests() {
   const [error, setError] = useState('');
   const [fixingCentre, setFixingCentre] = useState(null);
   const navigate = useNavigate();
+  const location = useLocation();
+
+  const isResponsable = location.pathname.startsWith('/responsable');
 
   const fetchMyCentres = async () => {
     setLoading(true);
@@ -35,7 +39,11 @@ export default function MyRequests() {
   };
 
   return (
-    <div className="mr-container">
+    <ResponsableCFLayout 
+      title={isResponsable ? "My <em>Applications</em>" : null} 
+      subtitle={isResponsable ? "Track the status of your training centre verification requests." : null}
+    >
+      <div className="mr-container" style={isResponsable ? { maxWidth: '100%', margin: '0', padding: '0' } : {}}>
       <style>{`
         .mr-container { max-width: 1000px; margin: 40px auto; padding: 0 24px; font-family: 'DM Sans', sans-serif; }
         .mr-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px; }
@@ -77,8 +85,8 @@ export default function MyRequests() {
         }
       `}</style>
 
-      <div className="mr-header">
-        <h1>My Applications</h1>
+      <div className="mr-header" style={isResponsable ? { justifyContent: 'flex-end', marginBottom: '24px' } : {}}>
+        {!isResponsable && <h1>My Applications</h1>}
         <button onClick={() => navigate('/centres/apply')} className="mr-btn-apply">+ New Application</button>
       </div>
 
@@ -153,6 +161,7 @@ export default function MyRequests() {
           onRefresh={fetchMyCentres} 
         />
       )}
-    </div>
+      </div>
+    </ResponsableCFLayout>
   );
 }
