@@ -223,7 +223,7 @@ export default function AdminDashboard() {
                       <div className="au-user-cell">
                         <div className="au-avatar">
                           {user.user_image ? (
-                            <img src={`http://localhost:5000/${user.user_image}`} alt="" />
+                            <img src={user.user_image.startsWith('http') ? user.user_image : `http://localhost:5000/${user.user_image}`} alt="" />
                           ) : (
                             (user.nom?.[0] || user.prenom?.[0] || user.email?.[0] || '?').toUpperCase()
                           )}
