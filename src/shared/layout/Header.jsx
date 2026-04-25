@@ -269,7 +269,7 @@ const Header = () => {
                 <div className="hd-user-chip" onClick={() => setUserMenuOpen(o => !o)}>
                   <div className="hd-avatar">
                     {user.user_image ? (
-                      <img src={`http://localhost:5000/${user.user_image}`} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }} />
+                      <img src={user.user_image.startsWith('http') ? user.user_image : `http://localhost:5000/${user.user_image}`} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }} />
                     ) : (
                       (user.nom?.[0] || user.prenom?.[0] || user.email?.[0] || 'U').toUpperCase()
                     )}
@@ -309,7 +309,12 @@ const Header = () => {
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
                             Platform Statistics
                           </Link>
+                          <Link to="/admin/centres/verify" className="hd-dropdown-link admin-link">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+                            Verify Centers
+                          </Link>
                         </>
+
                       )}
                       {user.role === 'responsableCF' && (
                         <>
@@ -341,6 +346,20 @@ const Header = () => {
                       </Link>
                     </>
                   )}
+                  {user.role !== 'admin' && user.role !== 'responsableCF' && (
+                    <>
+                      <div className="hd-dropdown-section">Partnership</div>
+                      <Link to="/centres/apply" className="hd-dropdown-link" style={{ color: '#b4915a' }}>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                        Apply for Center
+                      </Link>
+                      <Link to="/centres/my-requests" className="hd-dropdown-link">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+                        My Applications
+                      </Link>
+                    </>
+                  )}
+
                   {user.role === 'formateur' && (
                     <>
                       <div className="hd-dropdown-section">Formateur</div>
@@ -428,7 +447,9 @@ const Header = () => {
                     <Link to="/admin" className={`hd-drawer-link${isActive('/admin') && !isActive('/admin/') ? ' active' : ''}`} style={{ color: '#e07070' }}>User Management</Link>
                     <Link to="/admin/reports" className={`hd-drawer-link${isActive('/admin/reports') ? ' active' : ''}`} style={{ color: '#e07070' }}>Reported Content</Link>
                     <Link to="/admin/statistics" className={`hd-drawer-link${isActive('/admin/statistics') ? ' active' : ''}`} style={{ color: '#e07070' }}>Statistics</Link>
+                    <Link to="/admin/centres/verify" className={`hd-drawer-link${isActive('/admin/centres/verify') ? ' active' : ''}`} style={{ color: '#e07070' }}>Verify Centers</Link>
                   </>
+
                 )}
                 {user.role === 'responsableCF' && (
                   <>
@@ -442,6 +463,16 @@ const Header = () => {
                 <Link to="/admin/categories" className={`hd-drawer-link${isActive('/admin/categories') ? ' active' : ''}`} style={{ color: '#7dbf7d' }}>Categories</Link>
               </>
             )}
+            
+            {user.role !== 'admin' && user.role !== 'responsableCF' && (
+              <>
+                <div className="hd-drawer-divider" />
+                <div className="hd-drawer-section">Partnership</div>
+                <Link to="/centres/apply" className={`hd-drawer-link${isActive('/centres/apply') ? ' active' : ''}`} style={{ color: '#b4915a' }}>Apply for Center</Link>
+                <Link to="/centres/my-requests" className={`hd-drawer-link${isActive('/centres/my-requests') ? ' active' : ''}`}>My Applications</Link>
+              </>
+            )}
+
             
             <div className="hd-drawer-divider" />
             <button onClick={logout} className="hd-drawer-btn outline" style={{ background: 'none', cursor: 'pointer', fontFamily: 'DM Sans, sans-serif', color: '#e07070' }}>
