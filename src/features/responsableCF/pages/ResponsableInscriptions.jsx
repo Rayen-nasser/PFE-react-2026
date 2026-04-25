@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { inscriptionService } from '../services/inscription';
+import { inscriptionService, paiementService } from '../services/inscription';
 import ResponsableCFLayout from '../components/ResponsableCFLayout';
 
 export default function ResponsableInscriptions() {
@@ -16,7 +16,7 @@ export default function ResponsableInscriptions() {
     setLoading(true);
     setError('');
     try {
-      const res = await inscriptionService.getAll();
+      const res = await inscriptionService.getCentreInscriptions();
       setInscriptions(res.data.data || []);
     } catch {
       setError('Failed to load inscriptions');
