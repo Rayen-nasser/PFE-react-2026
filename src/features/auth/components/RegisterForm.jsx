@@ -35,8 +35,8 @@ const strengthColor = ['', '#e07070', '#e09a40', '#7dbf7d', '#4aa87d'];
 const ROLES = [
   { value: 'apprenant',    label: 'Student',         desc: 'Join courses & track progress',      icon: '🎓' },
   { value: 'formateur',    label: 'Trainer',          desc: 'Create & deliver training',           icon: '🧑‍🏫' },
-  { value: 'responsableCF',label: 'Center Manager',   desc: 'Manage a training center',            icon: '🏢' },
 ];
+
 
 /* ─── steps ─── */
 const STEPS = ['Account', 'Profile', 'Role'];
@@ -47,8 +47,8 @@ const INITIAL_FORM = {
   role: '',
   niveauEtude: '', dateNaissance: '', adresse: '',
   specialite: '', experience: '',
-  centreId: '',
 };
+
 
 /* ─── field helper (Outside to prevent remounting on each keystroke) ─── */
 const Field = ({ name, label, type = 'text', placeholder, children, className = '', formData, touched, fieldErrors, change, blur, showPw, setShowPw, showCpw, setShowCpw, ...props }) => {
@@ -355,16 +355,7 @@ const RegisterForm = () => {
             </div>
           </div>
         )}
-        {formData.role === 'responsableCF' && (
-          <div className="rf-role-fields">
-            <div className="rf-field">
-              <label className="rf-label">Center ID</label>
-              <div className="rf-input-wrap">
-                <input type="text" name="centreId" placeholder="Your center's ID" value={formData.centreId} onChange={change} className="rf-input" />
-              </div>
-            </div>
-          </div>
-        )}
+
       </>
     );
   };
