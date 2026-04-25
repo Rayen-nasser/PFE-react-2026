@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { centreService } from '../services/centre';
 import ResponsableCFLayout from '../components/ResponsableCFLayout';
 
 export default function ResponsableCentres() {
+  const navigate = useNavigate();
   const [centres, setCentres] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -31,7 +33,7 @@ export default function ResponsableCentres() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!formData.nom.trim()) return;
+    if (!formData.nom.trim() || !editingCentre) return;
 
     setSubmitting(true);
     try {
@@ -40,13 +42,10 @@ export default function ResponsableCentres() {
       data.append('adresse', formData.adresse);
       data.append('description', formData.description);
       data.append('telephone', formData.telephone);
-      data.append('logo', formData.logo || '');
+      if (formData.logo) data.append('logo', formData.logo);
 
-      if (editingCentre) {
-        await centreService.update(editingCentre._id, data);
-      } else {
-        await centreService.create(data);
-      }
+      await centreService.update(editingCentre._id, data);
+      
       setShowModal(false);
       setEditingCentre(null);
       setFormData({ nom: '', adresse: '', description: '', telephone: '', logo: null, user_image: null });
@@ -77,17 +76,12 @@ export default function ResponsableCentres() {
     try {
       await centreService.delete(id);
       fetchCentres();
-    } catch {
-      setError('Failed to delete centre');
+    } catch (err) {
+      setError(err.response?.data?.message || 'Failed to delete centre');
     }
   };
 
-  const openCreateModal = () => {
-    setEditingCentre(null);
-    setFormData({ nom: '', adresse: '', description: '', telephone: '', logo: null });
-    setLogoPreview('');
-    setShowModal(true);
-  };
+
 
   return (
     <ResponsableCFLayout title="My <em>Centres</em>" subtitle="Manage your training centres">
@@ -143,7 +137,7 @@ export default function ResponsableCentres() {
       `}</style>
 
       <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '24px' }}>
-        <button className="rc-add-btn" onClick={openCreateModal}>+ Add Centre</button>
+        <button className="rc-add-btn" onClick={() => navigate('/centres/apply')}>+ Apply for New Centre</button>
       </div>
 
       {error && <div className="rc-error">{error}</div>}
@@ -175,7 +169,15 @@ export default function ResponsableCentres() {
                 <p className="rc-card-desc">{centre.description || 'No description'}</p>
                 <div className="rc-card-actions">
                   <button className="rc-btn rc-btn-edit" onClick={() => handleEdit(centre)}>Edit</button>
-                  <button className="rc-btn rc-btn-delete" onClick={() => handleDelete(centre._id)}>Delete</button>
+                  <button 
+                    className="rc-btn rc-btn-delete" 
+                    onClick={() => handleDelete(centre._id)}
+                    disabled={centre.status !== 'rejected'}
+                    title={centre.status !== 'rejected' ? 'Only rejected centres can be deleted' : ''}
+                    style={centre.status !== 'rejected' ? { opacity: 0.5, cursor: 'not-allowed' } : {}}
+                  >
+                    Delete
+                  </button>
                 </div>
               </div>
             </div>
