@@ -686,7 +686,7 @@ const Profile = () => {
                     {imagePreview ? (
                       <img src={imagePreview} alt="Preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                     ) : profile?.user_image ? (
-                      <img src={`http://localhost:5000/${profile.user_image}`} alt="Avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                      <img src={profile.user_image.startsWith('http') ? profile.user_image : `http://localhost:5000/${profile.user_image}`} alt="Avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                     ) : (
                       roleMeta.icon || '👤'
                     )}
