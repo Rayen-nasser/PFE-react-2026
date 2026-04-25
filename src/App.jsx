@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './shared/context/AuthContext';
 import { Layout } from './shared/layout';
 import AdminRoute from './features/admin/components/AdminRoute';
@@ -17,6 +17,13 @@ import AdminReports from './features/admin/pages/AdminReports';
 import AdminStatistics from './features/admin/pages/AdminStatistics';
 import AdminCategories from './features/admin/pages/AdminCategories';
 import AdminSkills from './features/admin/pages/AdminSkills';
+import AdminPendingCentres from './features/admin/pages/AdminPendingCentres';
+import AdminVerifyCentreDetail from './features/admin/pages/AdminVerifyCentreDetail';
+import AdminCentres from './features/admin/pages/AdminCentres';
+
+import ApplyCentre from './features/centres/pages/ApplyCentre';
+import MyRequests from './features/centres/pages/MyRequests';
+
 import ResponsableCFRoute from './features/responsableCF/components/ResponsableCFRoute';
 import ResponsableDashboard from './features/responsableCF/pages/ResponsableDashboard';
 import ResponsableCentres from './features/responsableCF/pages/ResponsableCentres';
@@ -50,7 +57,10 @@ function App() {
             <Route path="formations" element={<Formations />} />
             <Route path="formations/:id" element={<FormationDetail />} />
             <Route path="centres" element={<Centres />} />
+            <Route path="centres/apply" element={<ApplyCentre />} />
+            <Route path="centres/my-requests" element={<MyRequests />} />
           </Route>
+
           <Route path="/admin" element={
             <AdminRoute>
               <AdminDashboard />
@@ -81,6 +91,22 @@ function App() {
               <AdminSkills />
             </AdminRoute>
           } />
+          <Route path="/admin/centres" element={
+            <AdminRoute>
+              <AdminCentres />
+            </AdminRoute>
+          } />
+          <Route path="/admin/centres/verify" element={
+            <AdminRoute>
+              <AdminPendingCentres />
+            </AdminRoute>
+          } />
+          <Route path="/admin/centres/verify/:id" element={
+            <AdminRoute>
+              <AdminVerifyCentreDetail />
+            </AdminRoute>
+          } />
+
           <Route path="/responsable" element={
             <ResponsableCFRoute>
               <ResponsableDashboard />
@@ -109,6 +135,11 @@ function App() {
           <Route path="/responsable/categories" element={
             <ResponsableCFRoute>
               <AdminCategories />
+            </ResponsableCFRoute>
+          } />
+          <Route path="/responsable/my-requests" element={
+            <ResponsableCFRoute>
+              <MyRequests />
             </ResponsableCFRoute>
           } />
           <Route path="/formateur" element={
@@ -156,6 +187,7 @@ function App() {
               <ApprenantFavoris />
             </ApprenantRoute>
           } />
+          <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </BrowserRouter>
     </AuthProvider>
