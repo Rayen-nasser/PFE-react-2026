@@ -16,7 +16,7 @@ export default function ResponsablePayments() {
     setLoading(true);
     setError('');
     try {
-      const res = await paymentService.getAll();
+      const res = await paymentService.getCentrePayments();
       setPayments(res.data.data || []);
     } catch {
       setError('Failed to load payments');
