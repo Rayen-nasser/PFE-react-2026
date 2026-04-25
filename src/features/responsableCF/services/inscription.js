@@ -3,6 +3,7 @@ import client from '../../../services/client';
 export const inscriptionService = {
   getAll:            ()         => client.get('/inscriptions'),
   getMyInscriptions: ()         => client.get('/inscriptions/me'),
+  getCentreInscriptions: ()     => client.get('/inscriptions/centre'),
   getById:           (id)       => client.get(`/inscriptions/${id}`),
   create:            (data)     => client.post('/inscriptions', data),
   cancel:            (id)       => client.put(`/inscriptions/cancel/${id}`),
