@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { formationService, categorieService } from '../../../services/api';
 import { useAuth } from '../../../shared/context/AuthContext';
+import AICourseRecommender from '../../../shared/components/AICourseRecommender';
 
 const CATEGORY_ICONS = ['✦', '◈', '⊕', '◉', '⬡', '⟁', '⊞', '⬖'];
 
@@ -347,6 +348,10 @@ const Home = () => {
               ))}
             </div>
           </div>
+        </section>
+
+        <section className="section" style={{ paddingTop: 0 }}>
+          <AICourseRecommender />
         </section>
 
         {/* FEATURES */}

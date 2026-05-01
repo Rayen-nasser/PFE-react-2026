@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import ApprenantLayout from '../components/ApprenantLayout';
 import { inscriptionService, favoriService, paiementService } from '../../../services/api';
+import AICourseRecommender from '../../../shared/components/AICourseRecommender';
 
 export default function ApprenantDashboard() {
   const [inscriptions, setInscriptions] = useState([]);
@@ -106,7 +107,9 @@ export default function ApprenantDashboard() {
         ))}
       </div>
 
-      <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 24, fontWeight: 400, color: '#f0ebe0', marginBottom: 20 }}>
+      <AICourseRecommender />
+
+      <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 24, fontWeight: 400, color: '#f0ebe0', marginBottom: 20, marginTop: 40 }}>
         Recent Enrollments
       </h2>
       
