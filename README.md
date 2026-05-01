@@ -1,16 +1,68 @@
-# React + Vite
+# Frontend - AI Course Recommender & LMS
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+This is the frontend application for the AI Course Recommender and Learning Management System. It is built using React, Vite, and Tailwind CSS.
 
-Currently, two official plugins are available:
+## 🚀 Tech Stack
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- **Framework**: React 18
+- **Build Tool**: Vite
+- **Styling**: Tailwind CSS 4
+- **Routing**: React Router DOM
+- **HTTP Client**: Axios
+- **Testing**: Vitest & React Testing Library
 
-## React Compiler
+## 🛠️ Prerequisites
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- [Node.js](https://nodejs.org/) (v18 or higher recommended)
+- [npm](https://www.npmjs.com/)
 
-## Expanding the ESLint configuration
+## 📦 Setup & Installation
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+1.  **Navigate to the frontend directory**:
+    ```bash
+    cd frontend
+    ```
+
+2.  **Install dependencies**:
+    ```bash
+    npm install
+    ```
+
+3.  **Configure API URL**:
+    The frontend communicates with the backend at `http://localhost:5000` by default. You can configure this in your service layer or via environment variables if implemented.
+
+## 🏃 Running the App
+
+- **Development Mode** (with HMR):
+  ```bash
+  npm run dev
+  ```
+- **Build for Production**:
+  ```bash
+  npm run build
+  ```
+- **Preview Production Build**:
+  ```bash
+  npm run preview
+  ```
+
+## 🧪 Testing
+
+- **Run tests**:
+  ```bash
+  npm test
+  ```
+- **Run tests with coverage**:
+  ```bash
+  npm run test:coverage
+  ```
+
+## 📂 Project Structure
+
+- `src/assets/`: Static assets like images and fonts.
+- `src/components/`: Reusable UI components.
+- `src/pages/`: Page-level components (screens).
+- `src/services/`: API calls and business logic.
+- `src/hooks/`: Custom React hooks.
+- `src/context/`: Context API providers for state management.
+- `src/utils/`: Helper functions and constants.
